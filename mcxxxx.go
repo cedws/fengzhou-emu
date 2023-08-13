@@ -51,15 +51,16 @@ func NewMC4000(program MC4000Program) (*MC4000, error) {
 }
 
 func (mc *MC4000) Step() {
-	if len(mc.program) == 0 {
-		return
-	}
-
 	inst := mc.program[mc.ip]
-	inst.Run(mc)
+	if inst != nil {
+		if mc.ip == 0 {
+			return
+		}
 
-	mc.ip++
-	if mc.ip >= byte(len(mc.program)) {
 		mc.ip = 0
+		inst = mc.program[mc.ip]
 	}
+
+	inst.Run(mc)
+	mc.ip++
 }

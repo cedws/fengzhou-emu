@@ -6,6 +6,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestEmptyProgram(t *testing.T) {
+	m, _ := NewMC4000(MC4000Program{})
+
+	m.Step()
+	assert.Equal(t, byte(0), m.ip)
+	m.Step()
+	assert.Equal(t, byte(0), m.ip)
+	m.Step()
+	assert.Equal(t, byte(0), m.ip)
+}
+
 func TestArithmetic(t *testing.T) {
 	m, _ := NewMC4000(MC4000Program{
 		Mov{Imm(1), Reg(Acc)},
@@ -31,4 +42,6 @@ func TestArithmetic(t *testing.T) {
 	assert.Equal(t, int16(1), m.registers[Acc])
 	m.Step()
 	assert.Equal(t, int16(42), m.registers[Acc])
+	m.Step()
+	assert.Equal(t, int16(1), m.registers[Acc])
 }
