@@ -45,3 +45,21 @@ func TestArithmetic(t *testing.T) {
 	m.Step()
 	assert.Equal(t, int16(1), m.registers[Acc])
 }
+
+func TestPower(t *testing.T) {
+	m, _ := NewMC4000(MC4000Program{
+		Mov{Imm(1), Reg(Acc)},
+		Add{Reg(Acc)},
+		Add{Reg(Acc)},
+		Sub{Imm(2)},
+		Sub{Imm(2)},
+		Add{Imm(1)},
+		Mul{Imm(42)},
+	})
+
+	for i := 0; i < 42; i++ {
+		m.Step()
+	}
+
+	assert.Equal(t, 42, m.Power())
+}

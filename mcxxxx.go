@@ -50,9 +50,13 @@ func NewMC4000(program MC4000Program) (*MC4000, error) {
 	}, nil
 }
 
+func (mc *MC4000) Power() int {
+	return mc.power
+}
+
 func (mc *MC4000) Step() {
 	inst := mc.program[mc.ip]
-	if inst != nil {
+	if inst == nil {
 		if mc.ip == 0 {
 			return
 		}
@@ -62,5 +66,7 @@ func (mc *MC4000) Step() {
 	}
 
 	inst.Run(mc)
+
+	mc.power += inst.Cost()
 	mc.ip++
 }
