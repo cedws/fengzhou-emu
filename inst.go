@@ -1,13 +1,19 @@
 package fengzhouemu
 
 const (
-	xbusMin = -999
-	xbusMax = 999
+	regMin = -999
+	regMax = 999
 )
 
 type Operand interface {
 	Type() OperandType
-	Value(*MC4000) int16
+	Value(map[Reg]int16) int16
+}
+
+type Inst interface {
+	Execute(map[Reg]int16)
+	Cost() int
+	Accesses() []Reg
 }
 
 type Nop struct{}
@@ -16,7 +22,7 @@ func (n Nop) Cost() int {
 	return 1
 }
 
-func (n Nop) Run(mc *MC4000) {}
+func (n Nop) Execute(registers map[Reg]int16) {}
 
 func (n Nop) Accesses() []Reg {
 	return nil
@@ -31,9 +37,9 @@ func (n Mov) Cost() int {
 	return 1
 }
 
-func (m Mov) Run(mc *MC4000) {
-	v := m.A.Value(mc)
-	mc.registers[m.B] = v
+func (m Mov) Execute(registers map[Reg]int16) {
+	v := m.A.Value(registers)
+	registers[m.B] = v
 }
 
 func (m Mov) Accesses() []Reg {
@@ -51,11 +57,11 @@ func (n Add) Cost() int {
 	return 1
 }
 
-func (m Add) Run(mc *MC4000) {
-	v := m.A.Value(mc)
-	mc.registers[Acc] += v
-	mc.registers[Acc] = min(mc.registers[Acc], xbusMax)
-	mc.registers[Acc] = max(mc.registers[Acc], xbusMin)
+func (m Add) Execute(registers map[Reg]int16) {
+	v := m.A.Value(registers)
+	registers[Acc] += v
+	registers[Acc] = min(registers[Acc], regMax)
+	registers[Acc] = max(registers[Acc], regMin)
 }
 
 func (m Add) Accesses() []Reg {
@@ -73,11 +79,11 @@ func (n Sub) Cost() int {
 	return 1
 }
 
-func (m Sub) Run(mc *MC4000) {
-	v := m.A.Value(mc)
-	mc.registers[Acc] -= v
-	mc.registers[Acc] = min(mc.registers[Acc], xbusMax)
-	mc.registers[Acc] = max(mc.registers[Acc], xbusMin)
+func (m Sub) Execute(registers map[Reg]int16) {
+	v := m.A.Value(registers)
+	registers[Acc] -= v
+	registers[Acc] = min(registers[Acc], regMax)
+	registers[Acc] = max(registers[Acc], regMin)
 }
 
 func (m Sub) Accesses() []Reg {
@@ -95,11 +101,11 @@ func (n Mul) Cost() int {
 	return 1
 }
 
-func (m Mul) Run(mc *MC4000) {
-	v := m.A.Value(mc)
-	mc.registers[Acc] *= v
-	mc.registers[Acc] = min(mc.registers[Acc], xbusMax)
-	mc.registers[Acc] = max(mc.registers[Acc], xbusMin)
+func (m Mul) Execute(registers map[Reg]int16) {
+	v := m.A.Value(registers)
+	registers[Acc] *= v
+	registers[Acc] = min(registers[Acc], regMax)
+	registers[Acc] = max(registers[Acc], regMin)
 }
 
 func (m Mul) Accesses() []Reg {

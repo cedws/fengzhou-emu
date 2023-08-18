@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEmptyProgram(t *testing.T) {
+func TestMC4000EmptyProgram(t *testing.T) {
 	m, _ := NewMC4000(MC4000Program{})
 
 	m.Step()
@@ -17,7 +17,7 @@ func TestEmptyProgram(t *testing.T) {
 	assert.Equal(t, byte(0), m.ip)
 }
 
-func TestArithmetic(t *testing.T) {
+func TestMC4000Arithmetic(t *testing.T) {
 	m, _ := NewMC4000(MC4000Program{
 		Mov{Imm(1), Reg(Acc)},
 		Add{Reg(Acc)},
@@ -46,7 +46,7 @@ func TestArithmetic(t *testing.T) {
 	assert.Equal(t, int16(1), m.registers[Acc])
 }
 
-func TestPower(t *testing.T) {
+func TestMC4000Power(t *testing.T) {
 	m, _ := NewMC4000(MC4000Program{
 		Mov{Imm(1), Reg(Acc)},
 		Add{Reg(Acc)},
@@ -64,16 +64,16 @@ func TestPower(t *testing.T) {
 	assert.Equal(t, 42, m.Power())
 }
 
-func TestValidation(t *testing.T) {
+func TestMC4000Validation(t *testing.T) {
+	// MC4000 does have a P0 register
 	_, err := NewMC4000(MC4000Program{
 		Mov{Imm(1), Reg(P0)},
 	})
-
 	assert.Nil(t, err)
 
+	// MC4000 does NOT have an X2 register
 	_, err = NewMC4000(MC4000Program{
-		Mov{Imm(1), Reg(1000)},
+		Mov{Imm(1), Reg(X2)},
 	})
-
 	assert.NotNil(t, err)
 }
