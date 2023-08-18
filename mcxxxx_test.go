@@ -63,3 +63,17 @@ func TestPower(t *testing.T) {
 
 	assert.Equal(t, 42, m.Power())
 }
+
+func TestValidation(t *testing.T) {
+	_, err := NewMC4000(MC4000Program{
+		Mov{Imm(1), Reg(P0)},
+	})
+
+	assert.Nil(t, err)
+
+	_, err = NewMC4000(MC4000Program{
+		Mov{Imm(1), Reg(1000)},
+	})
+
+	assert.NotNil(t, err)
+}

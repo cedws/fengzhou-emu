@@ -1,9 +1,22 @@
 package fengzhouemu
 
+import "fmt"
+
+type OperandType int
+
+const (
+	Immediate OperandType = iota
+	Register
+)
+
 type (
 	Imm int16
 	Reg int16
 )
+
+func (i Imm) Type() OperandType {
+	return Immediate
+}
 
 func (i Imm) Value(mc *MC4000) int16 {
 	return int16(i)
@@ -19,6 +32,10 @@ const (
 	X3
 )
 
+func (r Reg) Type() OperandType {
+	return Register
+}
+
 func (r Reg) Value(mc *MC4000) int16 {
 	return mc.registers[r]
 }
@@ -26,6 +43,7 @@ func (r Reg) Value(mc *MC4000) int16 {
 type Inst interface {
 	Run(*MC4000)
 	Cost() int
+	Accesses() []Reg
 }
 
 type MC4000Program [9]Inst
@@ -38,7 +56,7 @@ type MC4000 struct {
 }
 
 func NewMC4000(program MC4000Program) (*MC4000, error) {
-	return &MC4000{
+	mc := &MC4000{
 		program: program,
 		registers: map[Reg]int16{
 			Acc: 0,
@@ -47,7 +65,31 @@ func NewMC4000(program MC4000Program) (*MC4000, error) {
 			X0:  0,
 			X1:  0,
 		},
-	}, nil
+	}
+
+	if err := mc.Validate(program); err != nil {
+		return nil, err
+	}
+
+	return mc, nil
+}
+
+func (mc *MC4000) Validate(program MC4000Program) error {
+	for _, inst := range program {
+		if inst == nil {
+			continue
+		}
+
+		accesses := inst.Accesses()
+
+		for _, reg := range accesses {
+			if _, ok := mc.registers[reg]; !ok {
+				return fmt.Errorf("invalid register %d", reg)
+			}
+		}
+	}
+
+	return nil
 }
 
 func (mc *MC4000) Power() int {
