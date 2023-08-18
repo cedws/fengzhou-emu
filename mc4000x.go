@@ -1,7 +1,5 @@
 package fengzhouemu
 
-import "fmt"
-
 var defaultMC4000XRegisters = map[Reg]int16{
 	Acc: 0,
 	X0:  0,
@@ -46,7 +44,7 @@ func (mc *MC4000X) Validate(program MC4000XProgram) error {
 
 		for _, reg := range accesses {
 			if _, ok := mc.registers[reg]; !ok {
-				return fmt.Errorf("invalid register %d", reg)
+				return InvalidRegisterErr{reg.String()}
 			}
 		}
 	}
