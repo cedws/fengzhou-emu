@@ -22,7 +22,8 @@ func (i Imm) Value(registers map[Reg]int16) int16 {
 }
 
 const (
-	Acc Reg = iota
+	Null Reg = iota
+	Acc
 	Dat
 	P0
 	P1
@@ -34,6 +35,8 @@ const (
 
 func (r Reg) String() string {
 	switch r {
+	case Null:
+		return "null"
 	case Acc:
 		return "acc"
 	case Dat:
@@ -51,7 +54,7 @@ func (r Reg) String() string {
 	case X3:
 		return "x3"
 	default:
-		return ""
+		return "(unknown register)"
 	}
 }
 
