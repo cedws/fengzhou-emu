@@ -27,10 +27,12 @@ func (e InvalidRegisterErr) Error() string {
 	return fmt.Sprintf("invalid register %v", e.Reg)
 }
 
+// Operand represents a generic operand that can be either a register or immediate value.
 type Operand interface {
 	Value(map[Reg]int16) int16
 }
 
+// Inst represents a single instruction.
 type Inst interface {
 	Validate() error
 	Execute(map[Reg]int16)

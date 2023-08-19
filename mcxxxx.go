@@ -58,3 +58,68 @@ func (r Reg) String() string {
 func (r Reg) Value(registers map[Reg]int16) int16 {
 	return registers[r]
 }
+
+// MC is a generic microcontroller.
+type MC struct {
+	program   []Inst
+	registers map[Reg]int16
+
+	power int
+	ip    byte
+}
+
+// NewMC creates a new generic microcontroller with the given registers and no limits on program size.
+func NewMC(registers map[Reg]int16, program []Inst) (*MC, error) {
+	mc := &MC{
+		registers: registers,
+		program:   program,
+	}
+
+	if err := mc.Validate(program); err != nil {
+		return nil, err
+	}
+
+	return mc, nil
+}
+
+// Validate checks that the given program is valid for this microcontroller.
+func (mc *MC) Validate(program []Inst) error {
+	for _, inst := range program {
+		if inst == nil {
+			continue
+		}
+
+		accesses := inst.Accesses()
+
+		for _, reg := range accesses {
+			if _, ok := mc.registers[reg]; !ok {
+				return InvalidRegisterErr{reg.String()}
+			}
+		}
+	}
+
+	return nil
+}
+
+// Power returns the power consumed by this microcontroller so far.
+func (mc *MC) Power() int {
+	return mc.power
+}
+
+// Step executes the next instruction in the program.
+func (mc *MC) Step() {
+	inst := mc.program[mc.ip]
+	if inst == nil {
+		if mc.ip == 0 {
+			return
+		}
+
+		mc.ip = 0
+		inst = mc.program[mc.ip]
+	}
+
+	inst.Execute(mc.registers)
+
+	mc.power += inst.Cost()
+	mc.ip++
+}

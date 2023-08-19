@@ -10,65 +10,12 @@ var defaultMC4000Registers = map[Reg]int16{
 
 type MC4000Program [9]Inst
 
-type MC4000 struct {
-	program   MC4000Program
-	power     int
-	ip        byte
-	registers map[Reg]int16
-}
-
-func NewMC4000(program MC4000Program) (*MC4000, error) {
-	mc := &MC4000{
-		program:   program,
-		registers: make(map[Reg]int16),
-	}
+func NewMC4000(program MC4000Program) (*MC, error) {
+	registers := make(map[Reg]int16)
 
 	for k, v := range defaultMC4000Registers {
-		mc.registers[k] = v
+		registers[k] = v
 	}
 
-	if err := mc.Validate(program); err != nil {
-		return nil, err
-	}
-
-	return mc, nil
-}
-
-func (mc *MC4000) Validate(program MC4000Program) error {
-	for _, inst := range program {
-		if inst == nil {
-			continue
-		}
-
-		accesses := inst.Accesses()
-
-		for _, reg := range accesses {
-			if _, ok := mc.registers[reg]; !ok {
-				return InvalidRegisterErr{reg.String()}
-			}
-		}
-	}
-
-	return nil
-}
-
-func (mc *MC4000) Power() int {
-	return mc.power
-}
-
-func (mc *MC4000) Step() {
-	inst := mc.program[mc.ip]
-	if inst == nil {
-		if mc.ip == 0 {
-			return
-		}
-
-		mc.ip = 0
-		inst = mc.program[mc.ip]
-	}
-
-	inst.Execute(mc.registers)
-
-	mc.power += inst.Cost()
-	mc.ip++
+	return NewMC(registers, program[:])
 }
