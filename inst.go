@@ -15,14 +15,6 @@ const (
 	Disable
 )
 
-type (
-	NumberTooSmallErr  struct{}
-	NumberTooLargeErr  struct{}
-	InvalidRegisterErr struct {
-		Reg string
-	}
-)
-
 type condition struct {
 	Inst
 	c ConditionType
@@ -53,18 +45,6 @@ func Condition(c ConditionType, i Inst) Inst {
 		Inst: i,
 		c:    c,
 	}
-}
-
-func (e NumberTooSmallErr) Error() string {
-	return "number too small"
-}
-
-func (e NumberTooLargeErr) Error() string {
-	return "number too large"
-}
-
-func (e InvalidRegisterErr) Error() string {
-	return fmt.Sprintf("invalid register %v", e.Reg)
 }
 
 // Operand represents a generic operand that can be either a register or immediate value.

@@ -89,3 +89,11 @@ func TestInstLabelAndCondition(t *testing.T) {
 	nl = Condition(Disable, n)
 	assert.Equal(t, Disable, nl.Condition())
 }
+
+func TestInstInvalidLabel(t *testing.T) {
+	n := Label("hello;", Nop{})
+	assert.Equal(t, "hello;", n.Label())
+
+	_, err := NewMC4000(MC4000Program{n})
+	assert.ErrorIs(t, InvalidLabelNameErr{"hello;"}, err)
+}

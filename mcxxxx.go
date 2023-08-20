@@ -1,5 +1,9 @@
 package fengzhouemu
 
+import "regexp"
+
+var validLabel = regexp.MustCompile(`^\w*$`)
+
 type (
 	Imm int16
 	Reg int16
@@ -7,11 +11,11 @@ type (
 
 func (i Imm) Validate() error {
 	if i > regMax {
-		return NumberTooLargeErr{}
+		return NumberTooLargeErr{i}
 	}
 
 	if i < regMin {
-		return NumberTooSmallErr{}
+		return NumberTooSmallErr{i}
 	}
 
 	return nil
@@ -92,8 +96,12 @@ func (mc *MC) Validate(program []Inst) error {
 			continue
 		}
 
-		accesses := inst.Accesses()
+		label := inst.Label()
+		if !validLabel.MatchString(label) {
+			return InvalidLabelNameErr{label}
+		}
 
+		accesses := inst.Accesses()
 		for _, reg := range accesses {
 			if _, ok := mc.registers[reg]; !ok {
 				return InvalidRegisterErr{reg.String()}

@@ -8,10 +8,10 @@ import (
 
 func TestImmediate(t *testing.T) {
 	i := Mov{Imm(-1000), Reg(Acc)}
-	assert.ErrorIs(t, NumberTooSmallErr{}, i.Validate())
+	assert.ErrorIs(t, NumberTooSmallErr{-1000}, i.Validate())
 
 	i = Mov{Imm(1000), Reg(Acc)}
-	assert.ErrorIs(t, NumberTooLargeErr{}, i.Validate())
+	assert.ErrorIs(t, NumberTooLargeErr{1000}, i.Validate())
 }
 
 func TestNop(t *testing.T) {
