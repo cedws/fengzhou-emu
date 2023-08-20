@@ -77,3 +77,15 @@ func TestMC4000Validation(t *testing.T) {
 	})
 	assert.NotNil(t, err)
 }
+
+func TestInstLabelAndCondition(t *testing.T) {
+	n := Nop{}
+	assert.Equal(t, "", n.Label())
+
+	nl := Label("start", n)
+	assert.Equal(t, "start", nl.Label())
+
+	assert.Equal(t, Always, n.Condition())
+	nl = Condition(Disable, n)
+	assert.Equal(t, Disable, nl.Condition())
+}

@@ -7,6 +7,14 @@ const (
 	regMax = 999
 )
 
+type ConditionType int
+
+const (
+	Always ConditionType = iota
+	Enable
+	Disable
+)
+
 type (
 	NumberTooSmallErr  struct{}
 	NumberTooLargeErr  struct{}
@@ -14,6 +22,38 @@ type (
 		Reg string
 	}
 )
+
+type condition struct {
+	Inst
+	c ConditionType
+}
+
+type labelled struct {
+	Inst
+	l string
+}
+
+func (l labelled) Label() string {
+	return l.l
+}
+
+func Label(l string, i Inst) Inst {
+	return labelled{
+		Inst: i,
+		l:    l,
+	}
+}
+
+func (c condition) Condition() ConditionType {
+	return c.c
+}
+
+func Condition(c ConditionType, i Inst) Inst {
+	return condition{
+		Inst: i,
+		c:    c,
+	}
+}
 
 func (e NumberTooSmallErr) Error() string {
 	return "number too small"
@@ -39,6 +79,8 @@ type Inst interface {
 	Cost() int
 	Accesses() []Reg
 	String() string
+	Label() string
+	Condition() ConditionType
 }
 
 type Nop struct{}
@@ -59,6 +101,14 @@ func (n Nop) Accesses() []Reg {
 
 func (n Nop) String() string {
 	return "nop"
+}
+
+func (n Nop) Label() string {
+	return ""
+}
+
+func (n Nop) Condition() ConditionType {
+	return Always
 }
 
 type Mov struct {
@@ -93,6 +143,14 @@ func (m Mov) Accesses() []Reg {
 
 func (m Mov) String() string {
 	return fmt.Sprintf("mov %v %v", m.A, m.B)
+}
+
+func (m Mov) Label() string {
+	return ""
+}
+
+func (m Mov) Condition() ConditionType {
+	return Always
 }
 
 type Add struct {
@@ -130,6 +188,14 @@ func (a Add) String() string {
 	return fmt.Sprintf("add %v", a.A)
 }
 
+func (a Add) Label() string {
+	return ""
+}
+
+func (a Add) Condition() ConditionType {
+	return Always
+}
+
 type Sub struct {
 	A Operand
 }
@@ -165,6 +231,14 @@ func (s Sub) String() string {
 	return fmt.Sprintf("sub %v", s.A)
 }
 
+func (s Sub) Label() string {
+	return ""
+}
+
+func (s Sub) Condition() ConditionType {
+	return Always
+}
+
 type Mul struct {
 	A Operand
 }
@@ -198,4 +272,12 @@ func (m Mul) Accesses() []Reg {
 
 func (m Mul) String() string {
 	return fmt.Sprintf("mul %v", m.A)
+}
+
+func (m Mul) Label() string {
+	return ""
+}
+
+func (m Mul) Condition() ConditionType {
+	return Always
 }

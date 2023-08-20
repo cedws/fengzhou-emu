@@ -14,7 +14,7 @@ var defaultMC6000Registers = map[Reg]int16{
 type MC6000Program [14]Inst
 
 func NewMC6000(program MC6000Program) (*MC, error) {
-	registers := make(map[Reg]int16)
+	registers := make(map[Reg]int16, len(defaultMC6000Registers))
 
 	for k, v := range defaultMC6000Registers {
 		registers[k] = v
