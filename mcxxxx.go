@@ -4,6 +4,55 @@ import (
 	"regexp"
 )
 
+type Register interface {
+	Write(int16)
+	Read() int16
+}
+
+type NullRegister struct{}
+
+func (n NullRegister) Write(int16) {}
+
+func (n NullRegister) Read() int16 {
+	return 0
+}
+
+type InternalRegister struct {
+	value int16
+}
+
+func (i *InternalRegister) Write(v int16) {
+	i.value = v
+}
+
+func (i *InternalRegister) Read() int16 {
+	return i.value
+}
+
+type SimplePinRegister struct {
+	value int16
+}
+
+func (s *SimplePinRegister) Write(v int16) {
+	s.value = v
+}
+
+func (s *SimplePinRegister) Read() int16 {
+	return s.value
+}
+
+type XbusPinRegister struct {
+	valueCh chan int16
+}
+
+func (x *XbusPinRegister) Write(v int16) {
+	x.valueCh <- v
+}
+
+func (x *XbusPinRegister) Read() int16 {
+	return <-x.valueCh
+}
+
 var validLabel = regexp.MustCompile(`^\w*$`)
 
 type (
@@ -23,7 +72,7 @@ func (i Imm) Validate() error {
 	return nil
 }
 
-func (i Imm) Value(registers map[Reg]int16) int16 {
+func (i Imm) Value(registers map[Reg]Register) int16 {
 	return int16(i)
 }
 
@@ -64,21 +113,21 @@ func (r Reg) String() string {
 	}
 }
 
-func (r Reg) Value(registers map[Reg]int16) int16 {
-	return registers[r]
+func (r Reg) Value(registers map[Reg]Register) int16 {
+	return registers[r].Read()
 }
 
 // MC is a generic microcontroller.
 type MC struct {
 	program   []Inst
-	registers map[Reg]int16
+	registers map[Reg]Register
 
 	power int
 	ip    int
 }
 
 // NewMC creates a new generic microcontroller with the given registers and no limits on program size.
-func NewMC(registers map[Reg]int16, program []Inst) (*MC, error) {
+func NewMC(registers map[Reg]Register, program []Inst) (*MC, error) {
 	mc := &MC{
 		registers: registers,
 		program:   program,

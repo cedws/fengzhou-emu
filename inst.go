@@ -47,15 +47,15 @@ func Condition(c ConditionType, i Inst) Inst {
 	}
 }
 
-// Operand represents a generic operand that can be either a register or immediate value.
+// Operand represents a generic operand that can be either a Register or immediate value.
 type Operand interface {
-	Value(map[Reg]int16) int16
+	Value(map[Reg]Register) int16
 }
 
 // Inst represents a single instruction.
 type Inst interface {
 	Validate() error
-	Execute(map[Reg]int16)
+	Execute(map[Reg]Register)
 	Cost() int
 	Accesses() []Reg
 	String() string
@@ -73,7 +73,7 @@ func (n Nop) Cost() int {
 	return 1
 }
 
-func (n Nop) Execute(registers map[Reg]int16) {}
+func (n Nop) Execute(registers map[Reg]Register) {}
 
 func (n Nop) Accesses() []Reg {
 	return nil
@@ -108,9 +108,9 @@ func (m Mov) Cost() int {
 	return 1
 }
 
-func (m Mov) Execute(registers map[Reg]int16) {
+func (m Mov) Execute(registers map[Reg]Register) {
 	v := m.A.Value(registers)
-	registers[m.B] = v
+	registers[m.B].Write(v)
 }
 
 func (m Mov) Accesses() []Reg {
@@ -149,11 +149,14 @@ func (a Add) Cost() int {
 	return 1
 }
 
-func (a Add) Execute(registers map[Reg]int16) {
+func (a Add) Execute(registers map[Reg]Register) {
 	v := a.A.Value(registers)
-	registers[Acc] += v
-	registers[Acc] = min(registers[Acc], regMax)
-	registers[Acc] = max(registers[Acc], regMin)
+
+	n := registers[Acc].Read() + v
+	n = min(n, regMax)
+	n = max(n, regMin)
+
+	registers[Acc].Write(n)
 }
 
 func (a Add) Accesses() []Reg {
@@ -192,11 +195,14 @@ func (s Sub) Cost() int {
 	return 1
 }
 
-func (s Sub) Execute(registers map[Reg]int16) {
+func (s Sub) Execute(registers map[Reg]Register) {
 	v := s.A.Value(registers)
-	registers[Acc] -= v
-	registers[Acc] = min(registers[Acc], regMax)
-	registers[Acc] = max(registers[Acc], regMin)
+
+	n := registers[Acc].Read() - v
+	n = min(n, regMax)
+	n = max(n, regMin)
+
+	registers[Acc].Write(n)
 }
 
 func (s Sub) Accesses() []Reg {
@@ -235,11 +241,14 @@ func (m Mul) Cost() int {
 	return 1
 }
 
-func (m Mul) Execute(registers map[Reg]int16) {
+func (m Mul) Execute(registers map[Reg]Register) {
 	v := m.A.Value(registers)
-	registers[Acc] *= v
-	registers[Acc] = min(registers[Acc], regMax)
-	registers[Acc] = max(registers[Acc], regMin)
+
+	n := registers[Acc].Read() * v
+	n = min(n, regMax)
+	n = max(n, regMin)
+
+	registers[Acc].Write(n)
 }
 
 func (m Mul) Accesses() []Reg {

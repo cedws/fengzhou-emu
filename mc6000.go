@@ -1,20 +1,21 @@
 package fengzhouemu
 
-var defaultMC6000Registers = map[Reg]int16{
-	Acc: 0,
-	Dat: 0,
-	P0:  0,
-	P1:  0,
-	X0:  0,
-	X1:  0,
-	X2:  0,
-	X3:  0,
+var defaultMC6000Registers = map[Reg]Register{
+	Null: NullRegister{},
+	Acc:  &InternalRegister{},
+	Dat:  &InternalRegister{},
+	P0:   &SimplePinRegister{},
+	P1:   &SimplePinRegister{},
+	X0:   &XbusPinRegister{},
+	X1:   &XbusPinRegister{},
+	X2:   &XbusPinRegister{},
+	X3:   &XbusPinRegister{},
 }
 
 type MC6000Program [14]Inst
 
 func NewMC6000(program MC6000Program) (*MC, error) {
-	registers := make(map[Reg]int16, len(defaultMC6000Registers))
+	registers := make(map[Reg]Register, len(defaultMC6000Registers))
 
 	for k, v := range defaultMC6000Registers {
 		registers[k] = v
