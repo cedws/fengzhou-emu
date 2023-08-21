@@ -1,6 +1,8 @@
 package fengzhouemu
 
-import "regexp"
+import (
+	"regexp"
+)
 
 var validLabel = regexp.MustCompile(`^\w*$`)
 
@@ -72,7 +74,7 @@ type MC struct {
 	registers map[Reg]int16
 
 	power int
-	ip    byte
+	ip    int
 }
 
 // NewMC creates a new generic microcontroller with the given registers and no limits on program size.
@@ -119,6 +121,10 @@ func (mc *MC) Power() int {
 
 // Step executes the next instruction in the program.
 func (mc *MC) Step() {
+	if len(mc.program) == 0 {
+		return
+	}
+
 	inst := mc.program[mc.ip]
 	if inst == nil {
 		if mc.ip == 0 {
@@ -133,4 +139,8 @@ func (mc *MC) Step() {
 
 	mc.power += inst.Cost()
 	mc.ip++
+
+	if mc.ip >= len(mc.program) {
+		mc.ip = 0
+	}
 }

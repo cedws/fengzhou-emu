@@ -67,3 +67,23 @@ func TestMul(t *testing.T) {
 	assert.Equal(t, []Reg{Acc}, i.Accesses())
 	assert.Equal(t, "mul acc", i.String())
 }
+
+func TestInstLabelAndCondition(t *testing.T) {
+	n := Nop{}
+	assert.Equal(t, "", n.Label())
+
+	nl := Label("start", n)
+	assert.Equal(t, "start", nl.Label())
+
+	assert.Equal(t, Always, n.Condition())
+	nl = Condition(Disable, n)
+	assert.Equal(t, Disable, nl.Condition())
+}
+
+func TestInstInvalidLabel(t *testing.T) {
+	n := Label("hello;", Nop{})
+	assert.Equal(t, "hello;", n.Label())
+
+	_, err := NewMC4000(MC4000Program{n})
+	assert.ErrorIs(t, InvalidLabelNameErr{"hello;"}, err)
+}
