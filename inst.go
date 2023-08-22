@@ -3,8 +3,10 @@ package fengzhouemu
 import "fmt"
 
 const (
-	regMin = -999
-	regMax = 999
+	simplePinRegMin = 0
+	simplePinRegMax = 100
+	regMin          = -999
+	regMax          = 999
 )
 
 type ConditionType int
@@ -154,9 +156,6 @@ func (a Add) Execute(registers map[Reg]Register) {
 	v := a.A.Value(registers)
 
 	n := registers[Acc].Read() + v
-	n = min(n, regMax)
-	n = max(n, regMin)
-
 	registers[Acc].Write(n)
 }
 
@@ -200,9 +199,6 @@ func (s Sub) Execute(registers map[Reg]Register) {
 	v := s.A.Value(registers)
 
 	n := registers[Acc].Read() - v
-	n = min(n, regMax)
-	n = max(n, regMin)
-
 	registers[Acc].Write(n)
 }
 
@@ -246,9 +242,6 @@ func (m Mul) Execute(registers map[Reg]Register) {
 	v := m.A.Value(registers)
 
 	n := registers[Acc].Read() * v
-	n = min(n, regMax)
-	n = max(n, regMin)
-
 	registers[Acc].Write(n)
 }
 

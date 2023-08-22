@@ -23,6 +23,8 @@ type InternalRegister struct {
 
 func (i *InternalRegister) Write(v int16) {
 	i.value = v
+	i.value = min(i.value, regMax)
+	i.value = max(i.value, regMin)
 }
 
 func (i *InternalRegister) Read() int16 {
@@ -35,6 +37,8 @@ type SimplePinRegister struct {
 
 func (s *SimplePinRegister) Write(v int16) {
 	s.value = v
+	s.value = min(s.value, simplePinRegMax)
+	s.value = max(s.value, simplePinRegMin)
 }
 
 func (s *SimplePinRegister) Read() int16 {

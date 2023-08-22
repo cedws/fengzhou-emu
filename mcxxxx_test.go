@@ -35,6 +35,7 @@ func TestMCArithmetic(t *testing.T) {
 		Add{Imm(1)},
 		Mul{Imm(42)},
 		Not{},
+		Sub{Imm(1000)},
 	})
 
 	m.Step()
@@ -51,6 +52,8 @@ func TestMCArithmetic(t *testing.T) {
 	assert.Equal(t, int16(999), m.registers[Acc].Read())
 	m.Step()
 	assert.Equal(t, int16(0), m.registers[Acc].Read())
+	m.Step()
+	assert.Equal(t, int16(-999), m.registers[Acc].Read())
 }
 
 func TestMCPower(t *testing.T) {
