@@ -30,11 +30,11 @@ func TestMCArithmetic(t *testing.T) {
 	m, _ := NewMC(defaultMC4000Registers, []Inst{
 		Mov{Imm(1), Reg(Acc)},
 		Add{Reg(Acc)},
-		Add{Reg(Acc)},
 		Sub{Imm(2)},
-		Sub{Imm(2)},
+		Not{},
 		Add{Imm(1)},
 		Mul{Imm(42)},
+		Not{},
 	})
 
 	m.Step()
@@ -42,17 +42,15 @@ func TestMCArithmetic(t *testing.T) {
 	m.Step()
 	assert.Equal(t, int16(2), m.registers[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(4), m.registers[Acc].Read())
-	m.Step()
-	assert.Equal(t, int16(2), m.registers[Acc].Read())
-	m.Step()
 	assert.Equal(t, int16(0), m.registers[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(1), m.registers[Acc].Read())
+	assert.Equal(t, int16(100), m.registers[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(42), m.registers[Acc].Read())
+	assert.Equal(t, int16(101), m.registers[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(1), m.registers[Acc].Read())
+	assert.Equal(t, int16(999), m.registers[Acc].Read())
+	m.Step()
+	assert.Equal(t, int16(0), m.registers[Acc].Read())
 }
 
 func TestMCPower(t *testing.T) {

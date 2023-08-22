@@ -271,3 +271,42 @@ func (m Mul) Label() string {
 func (m Mul) Condition() ConditionType {
 	return Always
 }
+
+type Not struct{}
+
+func (n Not) Validate() error {
+	return nil
+}
+
+func (n Not) Cost() int {
+	return 1
+}
+
+func (n Not) Execute(registers map[Reg]Register) {
+	v := registers[Acc].Read()
+
+	switch v {
+	case 0:
+		v = 100
+	default:
+		v = 0
+	}
+
+	registers[Acc].Write(v)
+}
+
+func (n Not) Accesses() []Reg {
+	return []Reg{Acc}
+}
+
+func (n Not) String() string {
+	return "not"
+}
+
+func (n Not) Label() string {
+	return ""
+}
+
+func (n Not) Condition() ConditionType {
+	return Always
+}

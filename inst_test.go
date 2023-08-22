@@ -68,6 +68,14 @@ func TestMul(t *testing.T) {
 	assert.Equal(t, "mul acc", i.String())
 }
 
+func TestNot(t *testing.T) {
+	i := Not{}
+
+	assert.Nil(t, i.Validate())
+	assert.Equal(t, []Reg{Acc}, i.Accesses())
+	assert.Equal(t, "not", i.String())
+}
+
 func TestInstLabelAndCondition(t *testing.T) {
 	n := Nop{}
 	assert.Equal(t, "", n.Label())
