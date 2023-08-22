@@ -11,6 +11,7 @@ type ConditionType int
 
 const (
 	Always ConditionType = iota
+	Once
 	Enable
 	Disable
 )
