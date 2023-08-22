@@ -36,7 +36,7 @@ func TestAdd(t *testing.T) {
 	i := Add{Imm(1)}
 
 	assert.Nil(t, i.Validate())
-	assert.Empty(t, i.Accesses())
+	assert.Equal(t, []Reg{Acc}, i.Accesses())
 	assert.Equal(t, "add 1", i.String())
 
 	i = Add{Reg(Acc)}
@@ -48,7 +48,7 @@ func TestSub(t *testing.T) {
 	i := Sub{Imm(1)}
 
 	assert.Nil(t, i.Validate())
-	assert.Empty(t, i.Accesses())
+	assert.Equal(t, []Reg{Acc}, i.Accesses())
 	assert.Equal(t, "sub 1", i.String())
 
 	i = Sub{Reg(Acc)}
@@ -60,7 +60,7 @@ func TestMul(t *testing.T) {
 	i := Mul{Imm(1)}
 
 	assert.Nil(t, i.Validate())
-	assert.Empty(t, i.Accesses())
+	assert.Equal(t, []Reg{Acc}, i.Accesses())
 	assert.Equal(t, "mul 1", i.String())
 
 	i = Mul{Reg(Acc)}

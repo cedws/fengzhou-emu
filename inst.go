@@ -161,11 +161,11 @@ func (a Add) Execute(registers map[Reg]Register) {
 }
 
 func (a Add) Accesses() []Reg {
-	if reg, ok := a.A.(Reg); ok {
-		return []Reg{reg}
+	if reg, ok := a.A.(Reg); ok && reg != Acc {
+		return []Reg{Acc, reg}
 	}
 
-	return nil
+	return []Reg{Acc}
 }
 
 func (a Add) String() string {
@@ -207,11 +207,11 @@ func (s Sub) Execute(registers map[Reg]Register) {
 }
 
 func (s Sub) Accesses() []Reg {
-	if reg, ok := s.A.(Reg); ok {
-		return []Reg{reg}
+	if reg, ok := s.A.(Reg); ok && reg != Acc {
+		return []Reg{Acc, reg}
 	}
 
-	return nil
+	return []Reg{Acc}
 }
 
 func (s Sub) String() string {
@@ -253,11 +253,11 @@ func (m Mul) Execute(registers map[Reg]Register) {
 }
 
 func (m Mul) Accesses() []Reg {
-	if reg, ok := m.A.(Reg); ok {
-		return []Reg{reg}
+	if reg, ok := m.A.(Reg); ok && reg != Acc {
+		return []Reg{Acc, reg}
 	}
 
-	return nil
+	return []Reg{Acc}
 }
 
 func (m Mul) String() string {
