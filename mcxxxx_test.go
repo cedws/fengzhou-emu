@@ -18,6 +18,7 @@ func TestMCEmptyProgram(t *testing.T) {
 func TestMCNonEmptyProgram(t *testing.T) {
 	m, _ := NewMC(defaultMC4000Registers, []Inst{Nop{}, Nop{}})
 
+	assert.Equal(t, 0, m.ip)
 	m.Step()
 	assert.Equal(t, 1, m.ip)
 	m.Step()
@@ -90,4 +91,23 @@ func TestMCInternalRegister(t *testing.T) {
 
 	m.Step()
 	assert.Equal(t, int16(100), m.registers[Acc].Read())
+}
+
+func TestMCExecuteOnce(t *testing.T) {
+	m, _ := NewMC(defaultMC4000Registers, []Inst{
+		Condition(Once, Mov{Imm(0), Reg(Acc)}),
+		Condition(Once, Mov{Imm(1), Reg(Acc)}),
+		Mov{Imm(2), Reg(Acc)},
+	})
+
+	m.Step()
+	assert.Equal(t, int16(0), m.registers[Acc].Read())
+	m.Step()
+	assert.Equal(t, int16(1), m.registers[Acc].Read())
+	m.Step()
+	assert.Equal(t, int16(2), m.registers[Acc].Read())
+	m.Step()
+	assert.Equal(t, int16(2), m.registers[Acc].Read())
+	m.Step()
+	assert.Equal(t, int16(2), m.registers[Acc].Read())
 }

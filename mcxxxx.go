@@ -130,7 +130,8 @@ func (r Reg) Value(registers map[Reg]Register) int16 {
 
 // MC is a generic microcontroller.
 type MC struct {
-	program []Inst
+	program  []Inst
+	executed map[int]bool
 
 	power     int
 	ip        int
@@ -140,8 +141,9 @@ type MC struct {
 // NewMC creates a new generic microcontroller with the given registers and no limits on program size.
 func NewMC(registers map[Reg]Register, program []Inst) (*MC, error) {
 	mc := &MC{
-		registers: registers,
 		program:   program,
+		executed:  make(map[int]bool, len(program)),
+		registers: registers,
 	}
 
 	if err := mc.Validate(program); err != nil {
@@ -149,6 +151,33 @@ func NewMC(registers map[Reg]Register, program []Inst) (*MC, error) {
 	}
 
 	return mc, nil
+}
+
+func (mc *MC) fetch() Inst {
+	if len(mc.program) == 0 {
+		// variable size program is empty
+		return nil
+	}
+
+	inst := mc.program[mc.ip]
+	if inst != nil {
+		mc.ip++
+
+		if mc.ip >= len(mc.program) {
+			mc.ip = 0
+		}
+
+		return inst
+	}
+
+	if mc.ip == 0 {
+		// fixed size program is empty
+		return nil
+	}
+
+	// reached end of fixed size program, or instruction gap, or nil instruction
+	mc.ip = 0
+	return mc.program[mc.ip]
 }
 
 // Validate checks that the given program is valid for this microcontroller.
@@ -186,26 +215,26 @@ func (mc *MC) Power() int {
 
 // Step executes the next instruction in the program.
 func (mc *MC) Step() {
-	if len(mc.program) == 0 {
-		return
-	}
+	var inst Inst
 
-	inst := mc.program[mc.ip]
-	if inst == nil {
-		if mc.ip == 0 {
+	for {
+		inst = mc.fetch()
+		if inst == nil {
 			return
 		}
 
-		mc.ip = 0
-		inst = mc.program[mc.ip]
+		if inst.Condition() == Once {
+			// already executed
+			if mc.executed[mc.ip] {
+				continue
+			}
+
+			mc.executed[mc.ip] = true
+		}
+
+		break
 	}
 
 	inst.Execute(mc.registers)
-
 	mc.power += inst.Cost()
-	mc.ip++
-
-	if mc.ip >= len(mc.program) {
-		mc.ip = 0
-	}
 }
