@@ -81,15 +81,20 @@ func (i Imm) Value(registers map[Reg]Register) int16 {
 }
 
 const (
+	// internal registers
 	Null Reg = iota
 	Acc
 	Dat
+	// simple pin registers
 	P0
 	P1
+	// xbus pin registers
 	X0
 	X1
 	X2
 	X3
+	// flags register, not accessible
+	flags
 )
 
 func (r Reg) String() string {
@@ -112,6 +117,8 @@ func (r Reg) String() string {
 		return "x2"
 	case X3:
 		return "x3"
+	case flags:
+		fallthrough
 	default:
 		return "(unknown register)"
 	}
@@ -123,11 +130,11 @@ func (r Reg) Value(registers map[Reg]Register) int16 {
 
 // MC is a generic microcontroller.
 type MC struct {
-	program   []Inst
-	registers map[Reg]Register
+	program []Inst
 
-	power int
-	ip    int
+	power     int
+	ip        int
+	registers map[Reg]Register
 }
 
 // NewMC creates a new generic microcontroller with the given registers and no limits on program size.
@@ -158,6 +165,11 @@ func (mc *MC) Validate(program []Inst) error {
 
 		accesses := inst.Accesses()
 		for _, reg := range accesses {
+			// programs may not access flags register
+			if reg == flags {
+				return InvalidRegisterErr{reg.String()}
+			}
+
 			if _, ok := mc.registers[reg]; !ok {
 				return InvalidRegisterErr{reg.String()}
 			}

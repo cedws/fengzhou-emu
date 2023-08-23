@@ -1,12 +1,13 @@
 package fengzhouemu
 
 var defaultMC4000Registers = map[Reg]Register{
-	Null: NullRegister{},
-	Acc:  &InternalRegister{},
-	P0:   &SimplePinRegister{},
-	P1:   &SimplePinRegister{},
-	X0:   &XbusPinRegister{},
-	X1:   &XbusPinRegister{},
+	Null:  NullRegister{},
+	Acc:   &InternalRegister{},
+	P0:    &SimplePinRegister{},
+	P1:    &SimplePinRegister{},
+	X0:    &XbusPinRegister{},
+	X1:    &XbusPinRegister{},
+	flags: &InternalRegister{},
 }
 
 type MC4000Program [9]Inst

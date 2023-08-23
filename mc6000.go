@@ -1,15 +1,16 @@
 package fengzhouemu
 
 var defaultMC6000Registers = map[Reg]Register{
-	Null: NullRegister{},
-	Acc:  &InternalRegister{},
-	Dat:  &InternalRegister{},
-	P0:   &SimplePinRegister{},
-	P1:   &SimplePinRegister{},
-	X0:   &XbusPinRegister{},
-	X1:   &XbusPinRegister{},
-	X2:   &XbusPinRegister{},
-	X3:   &XbusPinRegister{},
+	Null:  NullRegister{},
+	Acc:   &InternalRegister{},
+	Dat:   &InternalRegister{},
+	P0:    &SimplePinRegister{},
+	P1:    &SimplePinRegister{},
+	X0:    &XbusPinRegister{},
+	X1:    &XbusPinRegister{},
+	X2:    &XbusPinRegister{},
+	X3:    &XbusPinRegister{},
+	flags: &InternalRegister{},
 }
 
 type MC6000Program [14]Inst
