@@ -10,10 +10,13 @@ func newRegisters() map[Reg]Register {
 	return map[Reg]Register{
 		Null:  NullRegister{},
 		Acc:   &InternalRegister{},
+		Dat:   &InternalRegister{},
 		P0:    &SimplePinRegister{},
 		P1:    &SimplePinRegister{},
 		X0:    &XbusPinRegister{},
 		X1:    &XbusPinRegister{},
+		X2:    &XbusPinRegister{},
+		X3:    &XbusPinRegister{},
 		flags: &InternalRegister{},
 	}
 }
@@ -150,4 +153,24 @@ func TestMCExecuteDisable(t *testing.T) {
 	m.Step()
 	m.Step()
 	assert.Equal(t, int16(1), m.registers[Acc].Read())
+}
+
+func TestMCTcpExecuteCondition(t *testing.T) {
+	m, _ := NewMC(newRegisters(), []Inst{
+		Tcp{Imm(2), Imm(1)},
+		Condition(Enable, Mov{Imm(1), Reg(Dat)}),
+		Condition(Disable, Mov{Imm(-1), Reg(Dat)}),
+		Mov{Imm(0), Reg(Dat)},
+		Tcp{Imm(1), Imm(1)},
+		Condition(Enable, Mov{Imm(1), Reg(Dat)}),
+		Condition(Disable, Mov{Imm(-1), Reg(Dat)}),
+	})
+
+	m.Step()
+	m.Step()
+	assert.Equal(t, int16(1), m.registers[Dat].Read())
+	m.Step()
+	assert.Equal(t, int16(0), m.registers[Dat].Read())
+	m.Step()
+	assert.Equal(t, int16(0), m.registers[Dat].Read())
 }

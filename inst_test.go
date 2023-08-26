@@ -77,11 +77,13 @@ func TestNot(t *testing.T) {
 }
 
 func TestTeq(t *testing.T) {
-	reg := map[Reg]Register{
-		Acc:   &InternalRegister{},
-		Dat:   &InternalRegister{},
-		flags: &InternalRegister{},
-	}
+	i := Teq{Reg(Acc), Reg(Acc)}
+	assert.Equal(t, []Reg{Acc}, i.Accesses())
+	assert.Equal(t, "teq acc acc", i.String())
+}
+
+func TestTeqExecute(t *testing.T) {
+	reg := newRegisters()
 
 	reg[Acc].Write(1)
 	reg[Dat].Write(1)
@@ -99,11 +101,13 @@ func TestTeq(t *testing.T) {
 }
 
 func TestTgt(t *testing.T) {
-	reg := map[Reg]Register{
-		Acc:   &InternalRegister{},
-		Dat:   &InternalRegister{},
-		flags: &InternalRegister{},
-	}
+	i := Tgt{Reg(Acc), Reg(Acc)}
+	assert.Equal(t, []Reg{Acc}, i.Accesses())
+	assert.Equal(t, "tgt acc acc", i.String())
+}
+
+func TestTgtExecute(t *testing.T) {
+	reg := newRegisters()
 
 	reg[Acc].Write(2)
 	reg[Dat].Write(1)
@@ -121,11 +125,13 @@ func TestTgt(t *testing.T) {
 }
 
 func TestTlt(t *testing.T) {
-	reg := map[Reg]Register{
-		Acc:   &InternalRegister{},
-		Dat:   &InternalRegister{},
-		flags: &InternalRegister{},
-	}
+	i := Tlt{Reg(Acc), Reg(Acc)}
+	assert.Equal(t, []Reg{Acc}, i.Accesses())
+	assert.Equal(t, "tlt acc acc", i.String())
+}
+
+func TestTltExecute(t *testing.T) {
+	reg := newRegisters()
 
 	reg[Acc].Write(1)
 	reg[Dat].Write(2)
@@ -143,11 +149,13 @@ func TestTlt(t *testing.T) {
 }
 
 func TestTcp(t *testing.T) {
-	reg := map[Reg]Register{
-		Acc:   &InternalRegister{},
-		Dat:   &InternalRegister{},
-		flags: &InternalRegister{},
-	}
+	i := Tcp{Reg(Acc), Reg(Acc)}
+	assert.Equal(t, []Reg{Acc}, i.Accesses())
+	assert.Equal(t, "tcp acc acc", i.String())
+}
+
+func TestTcpExecute(t *testing.T) {
+	reg := newRegisters()
 
 	reg[Acc].Write(2)
 	reg[Dat].Write(1)

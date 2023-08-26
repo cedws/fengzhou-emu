@@ -312,6 +312,17 @@ type Teq struct {
 }
 
 func (t Teq) Validate() error {
+	if imm, ok := t.A.(Imm); ok {
+		if err := imm.Validate(); err != nil {
+			return err
+		}
+	}
+	if imm, ok := t.B.(Imm); ok {
+		if err := imm.Validate(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -332,8 +343,14 @@ func (t Teq) Execute(registers map[Reg]Register) {
 	registers[flags].Write(currentFlags)
 }
 
-func (t Teq) Accesses() []Reg {
-	return nil
+func (t Teq) Accesses() (registers []Reg) {
+	if reg, ok := t.A.(Reg); ok {
+		registers = append(registers, reg)
+	}
+	if reg, ok := t.B.(Reg); ok && reg != t.A {
+		registers = append(registers, reg)
+	}
+	return
 }
 
 func (t Teq) String() string {
@@ -354,6 +371,17 @@ type Tgt struct {
 }
 
 func (t Tgt) Validate() error {
+	if imm, ok := t.A.(Imm); ok {
+		if err := imm.Validate(); err != nil {
+			return err
+		}
+	}
+	if imm, ok := t.B.(Imm); ok {
+		if err := imm.Validate(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -374,8 +402,14 @@ func (t Tgt) Execute(registers map[Reg]Register) {
 	registers[flags].Write(currentFlags)
 }
 
-func (t Tgt) Accesses() []Reg {
-	return nil
+func (t Tgt) Accesses() (registers []Reg) {
+	if reg, ok := t.A.(Reg); ok {
+		registers = append(registers, reg)
+	}
+	if reg, ok := t.B.(Reg); ok && reg != t.A {
+		registers = append(registers, reg)
+	}
+	return
 }
 
 func (t Tgt) String() string {
@@ -396,6 +430,17 @@ type Tlt struct {
 }
 
 func (t Tlt) Validate() error {
+	if imm, ok := t.A.(Imm); ok {
+		if err := imm.Validate(); err != nil {
+			return err
+		}
+	}
+	if imm, ok := t.B.(Imm); ok {
+		if err := imm.Validate(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -416,8 +461,14 @@ func (t Tlt) Execute(registers map[Reg]Register) {
 	registers[flags].Write(currentFlags)
 }
 
-func (t Tlt) Accesses() []Reg {
-	return nil
+func (t Tlt) Accesses() (registers []Reg) {
+	if reg, ok := t.A.(Reg); ok {
+		registers = append(registers, reg)
+	}
+	if reg, ok := t.B.(Reg); ok && reg != t.A {
+		registers = append(registers, reg)
+	}
+	return
 }
 
 func (t Tlt) String() string {
@@ -438,6 +489,17 @@ type Tcp struct {
 }
 
 func (t Tcp) Validate() error {
+	if imm, ok := t.A.(Imm); ok {
+		if err := imm.Validate(); err != nil {
+			return err
+		}
+	}
+	if imm, ok := t.B.(Imm); ok {
+		if err := imm.Validate(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -462,8 +524,14 @@ func (t Tcp) Execute(registers map[Reg]Register) {
 	registers[flags].Write(currentFlags)
 }
 
-func (t Tcp) Accesses() []Reg {
-	return nil
+func (t Tcp) Accesses() (registers []Reg) {
+	if reg, ok := t.A.(Reg); ok {
+		registers = append(registers, reg)
+	}
+	if reg, ok := t.B.(Reg); ok && reg != t.A {
+		registers = append(registers, reg)
+	}
+	return
 }
 
 func (t Tcp) String() string {
