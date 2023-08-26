@@ -4,6 +4,13 @@ import (
 	"regexp"
 )
 
+const (
+	simplePinRegMin = 0
+	simplePinRegMax = 100
+	regMin          = -999
+	regMax          = 999
+)
+
 var validLabel = regexp.MustCompile(`^\w*$`)
 
 type (
