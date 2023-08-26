@@ -22,6 +22,11 @@ func newRegisters() map[Reg]Register {
 	}
 }
 
+func TestImmediate(t *testing.T) {
+	assert.ErrorIs(t, Imm(-1000).Validate(), NumberTooSmallErr{-1000})
+	assert.ErrorIs(t, Imm(1000).Validate(), NumberTooLargeErr{1000})
+}
+
 func TestMCEmptyProgram(t *testing.T) {
 	m, err := NewMC(newRegisters(), []Inst{})
 	assert.Nil(t, err)
@@ -186,6 +191,14 @@ func TestMCTcpExecuteCondition(t *testing.T) {
 	assert.Equal(t, int16(0), m.reg[Dat].Read())
 }
 
+func TestMCLabelAlreadyDefined(t *testing.T) {
+	_, err := NewMC(newRegisters(), []Inst{
+		Label("123", Mov{Imm(100), Reg(Dat)}),
+		Label("123", Mov{Imm(100), Reg(Dat)}),
+	})
+	assert.ErrorIs(t, err, LabelAlreadyDefinedErr{"123"})
+}
+
 func TestMCUndefinedJmp(t *testing.T) {
 	_, err := NewMC(newRegisters(), []Inst{
 		Jmp{"123"},
@@ -207,12 +220,16 @@ func TestMCJmp(t *testing.T) {
 		Nop{},
 		Nop{},
 		Nop{},
-		Label("123", Mov{Imm(100), Reg(Dat)}),
+		Label("123", Not{}),
 	})
 	assert.Nil(t, err)
 
 	m.Step()
 	m.Step()
-	assert.Equal(t, int16(100), m.reg[Dat].Read())
+	assert.Equal(t, int16(100), m.reg[Acc].Read())
 	assert.Equal(t, int(2), m.Power())
+	m.Step()
+	m.Step()
+	assert.Equal(t, int16(0), m.reg[Acc].Read())
+	assert.Equal(t, int(4), m.Power())
 }
