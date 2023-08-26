@@ -321,12 +321,12 @@ func (t Teq) Cost() int {
 
 func (t Teq) Execute(registers map[Reg]Register) {
 	currentFlags := registers[flags].Read()
-	currentFlags |= (1 << testFlag)
+	currentFlags |= testFlag
 
 	if t.A.Value(registers) == t.B.Value(registers) {
-		currentFlags |= (1 << executeFlag)
+		currentFlags |= enableFlag
 	} else {
-		currentFlags &^= (1 << executeFlag)
+		currentFlags &^= enableFlag
 	}
 
 	registers[flags].Write(currentFlags)
@@ -363,12 +363,12 @@ func (t Tgt) Cost() int {
 
 func (t Tgt) Execute(registers map[Reg]Register) {
 	currentFlags := registers[flags].Read()
-	currentFlags |= (1 << testFlag)
+	currentFlags |= testFlag
 
 	if t.A.Value(registers) > t.B.Value(registers) {
-		currentFlags |= (1 << executeFlag)
+		currentFlags |= enableFlag
 	} else {
-		currentFlags &^= (1 << executeFlag)
+		currentFlags &^= enableFlag
 	}
 
 	registers[flags].Write(currentFlags)
@@ -405,12 +405,12 @@ func (t Tlt) Cost() int {
 
 func (t Tlt) Execute(registers map[Reg]Register) {
 	currentFlags := registers[flags].Read()
-	currentFlags |= (1 << testFlag)
+	currentFlags |= testFlag
 
 	if t.A.Value(registers) < t.B.Value(registers) {
-		currentFlags |= (1 << executeFlag)
+		currentFlags |= enableFlag
 	} else {
-		currentFlags &^= (1 << executeFlag)
+		currentFlags &^= enableFlag
 	}
 
 	registers[flags].Write(currentFlags)
@@ -450,14 +450,13 @@ func (t Tcp) Execute(registers map[Reg]Register) {
 
 	switch {
 	case t.A.Value(registers) > t.B.Value(registers):
-		currentFlags |= (1 << testFlag)
-		currentFlags |= (1 << executeFlag)
+		currentFlags |= testFlag
+		currentFlags |= enableFlag
 	case t.A.Value(registers) < t.B.Value(registers):
-		currentFlags |= (1 << testFlag)
-		currentFlags &^= (1 << executeFlag)
+		currentFlags |= testFlag
+		currentFlags &^= enableFlag
 	default:
-		currentFlags &^= (1 << testFlag)
-		currentFlags &^= (1 << executeFlag)
+		currentFlags &^= testFlag
 	}
 
 	registers[flags].Write(currentFlags)

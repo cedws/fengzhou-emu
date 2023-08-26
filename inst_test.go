@@ -89,13 +89,13 @@ func TestTeq(t *testing.T) {
 	i := Teq{Reg(Acc), Reg(Dat)}
 
 	i.Execute(reg)
-	assert.Equal(t, int16((1<<testFlag)|(1<<executeFlag)), reg[flags].Read())
+	assert.Equal(t, int16(testFlag|enableFlag), reg[flags].Read())
 
 	reg[Acc].Write(2)
 	reg[Dat].Write(1)
 
 	i.Execute(reg)
-	assert.Equal(t, int16((1 << testFlag)), reg[flags].Read())
+	assert.Equal(t, int16(testFlag), reg[flags].Read())
 }
 
 func TestTgt(t *testing.T) {
@@ -111,13 +111,13 @@ func TestTgt(t *testing.T) {
 	i := Tgt{Reg(Acc), Reg(Dat)}
 
 	i.Execute(reg)
-	assert.Equal(t, int16((1<<testFlag)|(1<<executeFlag)), reg[flags].Read())
+	assert.Equal(t, int16(testFlag|enableFlag), reg[flags].Read())
 
 	reg[Acc].Write(1)
 	reg[Dat].Write(1)
 
 	i.Execute(reg)
-	assert.Equal(t, int16((1 << testFlag)), reg[flags].Read())
+	assert.Equal(t, int16(testFlag), reg[flags].Read())
 }
 
 func TestTlt(t *testing.T) {
@@ -133,13 +133,13 @@ func TestTlt(t *testing.T) {
 	i := Tlt{Reg(Acc), Reg(Dat)}
 
 	i.Execute(reg)
-	assert.Equal(t, int16((1<<testFlag)|(1<<executeFlag)), reg[flags].Read())
+	assert.Equal(t, int16(testFlag|enableFlag), reg[flags].Read())
 
 	reg[Acc].Write(1)
 	reg[Dat].Write(1)
 
 	i.Execute(reg)
-	assert.Equal(t, int16((1 << testFlag)), reg[flags].Read())
+	assert.Equal(t, int16(testFlag), reg[flags].Read())
 }
 
 func TestTcp(t *testing.T) {
@@ -155,13 +155,13 @@ func TestTcp(t *testing.T) {
 	i := Tcp{Reg(Acc), Reg(Dat)}
 
 	i.Execute(reg)
-	assert.Equal(t, int16((1<<testFlag)|(1<<executeFlag)), reg[flags].Read())
+	assert.Equal(t, int16(testFlag|enableFlag), reg[flags].Read())
 
 	reg[Acc].Write(1)
 	reg[Dat].Write(2)
 
 	i.Execute(reg)
-	assert.Equal(t, int16((1 << testFlag)), reg[flags].Read())
+	assert.Equal(t, int16(testFlag), reg[flags].Read())
 
 	reg[Acc].Write(1)
 	reg[Dat].Write(1)

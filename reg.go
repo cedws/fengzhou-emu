@@ -1,8 +1,8 @@
 package fengzhouemu
 
 const (
-	testFlag = iota
-	executeFlag
+	testFlag = 1 << iota
+	enableFlag
 )
 
 const (

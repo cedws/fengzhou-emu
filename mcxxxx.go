@@ -122,13 +122,24 @@ func (mc *MC) Step() {
 			return
 		}
 
-		if inst.Condition() == Once {
+		flags := mc.registers[flags].Read()
+
+		switch inst.Condition() {
+		case Once:
 			// already executed
 			if mc.executed[mc.ip] {
 				continue
 			}
 
 			mc.executed[mc.ip] = true
+		case Enable:
+			if flags&testFlag == 0 || flags&enableFlag == 0 {
+				continue
+			}
+		case Disable:
+			if flags&testFlag == 0 || flags&enableFlag != 0 {
+				continue
+			}
 		}
 
 		break
