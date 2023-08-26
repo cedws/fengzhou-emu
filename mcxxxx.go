@@ -50,7 +50,7 @@ func NewMC(reg map[Reg]Register, program []Inst) (*MC, error) {
 	mc := &MC{
 		program:  program,
 		executed: make(map[int16]bool, len(program)),
-		labels:   make(map[string]int16),
+		labels:   make(map[string]int16, len(program)),
 		reg:      reg,
 	}
 
@@ -127,8 +127,9 @@ func (mc *MC) Validate(program []Inst) error {
 
 		accesses := inst.Accesses()
 		for _, reg := range accesses {
-			// programs may not access flags register
-			if reg == flags {
+			// programs may not access private registers
+			switch reg {
+			case ip, flags:
 				return InvalidRegisterErr{reg.String()}
 			}
 
