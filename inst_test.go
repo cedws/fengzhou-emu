@@ -76,6 +76,100 @@ func TestNot(t *testing.T) {
 	assert.Equal(t, "not", i.String())
 }
 
+func TestTeq(t *testing.T) {
+	reg := map[Reg]Register{
+		Acc:   &InternalRegister{},
+		Dat:   &InternalRegister{},
+		flags: &InternalRegister{},
+	}
+
+	reg[Acc].Write(1)
+	reg[Dat].Write(1)
+
+	i := Teq{Reg(Acc), Reg(Dat)}
+
+	i.Execute(reg)
+	assert.Equal(t, int16((1<<testFlag)|(1<<executeFlag)), reg[flags].Read())
+
+	reg[Acc].Write(2)
+	reg[Dat].Write(1)
+
+	i.Execute(reg)
+	assert.Equal(t, int16((1 << testFlag)), reg[flags].Read())
+}
+
+func TestTgt(t *testing.T) {
+	reg := map[Reg]Register{
+		Acc:   &InternalRegister{},
+		Dat:   &InternalRegister{},
+		flags: &InternalRegister{},
+	}
+
+	reg[Acc].Write(2)
+	reg[Dat].Write(1)
+
+	i := Tgt{Reg(Acc), Reg(Dat)}
+
+	i.Execute(reg)
+	assert.Equal(t, int16((1<<testFlag)|(1<<executeFlag)), reg[flags].Read())
+
+	reg[Acc].Write(1)
+	reg[Dat].Write(1)
+
+	i.Execute(reg)
+	assert.Equal(t, int16((1 << testFlag)), reg[flags].Read())
+}
+
+func TestTlt(t *testing.T) {
+	reg := map[Reg]Register{
+		Acc:   &InternalRegister{},
+		Dat:   &InternalRegister{},
+		flags: &InternalRegister{},
+	}
+
+	reg[Acc].Write(1)
+	reg[Dat].Write(2)
+
+	i := Tlt{Reg(Acc), Reg(Dat)}
+
+	i.Execute(reg)
+	assert.Equal(t, int16((1<<testFlag)|(1<<executeFlag)), reg[flags].Read())
+
+	reg[Acc].Write(1)
+	reg[Dat].Write(1)
+
+	i.Execute(reg)
+	assert.Equal(t, int16((1 << testFlag)), reg[flags].Read())
+}
+
+func TestTcp(t *testing.T) {
+	reg := map[Reg]Register{
+		Acc:   &InternalRegister{},
+		Dat:   &InternalRegister{},
+		flags: &InternalRegister{},
+	}
+
+	reg[Acc].Write(2)
+	reg[Dat].Write(1)
+
+	i := Tcp{Reg(Acc), Reg(Dat)}
+
+	i.Execute(reg)
+	assert.Equal(t, int16((1<<testFlag)|(1<<executeFlag)), reg[flags].Read())
+
+	reg[Acc].Write(1)
+	reg[Dat].Write(2)
+
+	i.Execute(reg)
+	assert.Equal(t, int16((1 << testFlag)), reg[flags].Read())
+
+	reg[Acc].Write(1)
+	reg[Dat].Write(1)
+
+	i.Execute(reg)
+	assert.Equal(t, int16(0), reg[flags].Read())
+}
+
 func TestInstLabelAndCondition(t *testing.T) {
 	n := Nop{}
 	assert.Equal(t, "", n.Label())

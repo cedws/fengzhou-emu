@@ -1,6 +1,8 @@
 package fengzhouemu
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const (
 	simplePinRegMin = 0
@@ -301,5 +303,178 @@ func (n Not) Label() string {
 }
 
 func (n Not) Condition() ConditionType {
+	return Always
+}
+
+type Teq struct {
+	A Operand
+	B Operand
+}
+
+func (t Teq) Validate() error {
+	return nil
+}
+
+func (t Teq) Cost() int {
+	return 1
+}
+
+func (t Teq) Execute(registers map[Reg]Register) {
+	currentFlags := registers[flags].Read()
+	currentFlags |= (1 << testFlag)
+
+	if t.A.Value(registers) == t.B.Value(registers) {
+		currentFlags |= (1 << executeFlag)
+	} else {
+		currentFlags &^= (1 << executeFlag)
+	}
+
+	registers[flags].Write(currentFlags)
+}
+
+func (t Teq) Accesses() []Reg {
+	return nil
+}
+
+func (t Teq) String() string {
+	return fmt.Sprintf("teq %v %v", t.A, t.B)
+}
+
+func (t Teq) Label() string {
+	return ""
+}
+
+func (t Teq) Condition() ConditionType {
+	return Always
+}
+
+type Tgt struct {
+	A Operand
+	B Operand
+}
+
+func (t Tgt) Validate() error {
+	return nil
+}
+
+func (t Tgt) Cost() int {
+	return 1
+}
+
+func (t Tgt) Execute(registers map[Reg]Register) {
+	currentFlags := registers[flags].Read()
+	currentFlags |= (1 << testFlag)
+
+	if t.A.Value(registers) > t.B.Value(registers) {
+		currentFlags |= (1 << executeFlag)
+	} else {
+		currentFlags &^= (1 << executeFlag)
+	}
+
+	registers[flags].Write(currentFlags)
+}
+
+func (t Tgt) Accesses() []Reg {
+	return nil
+}
+
+func (t Tgt) String() string {
+	return fmt.Sprintf("tgt %v %v", t.A, t.B)
+}
+
+func (t Tgt) Label() string {
+	return ""
+}
+
+func (t Tgt) Condition() ConditionType {
+	return Always
+}
+
+type Tlt struct {
+	A Operand
+	B Operand
+}
+
+func (t Tlt) Validate() error {
+	return nil
+}
+
+func (t Tlt) Cost() int {
+	return 1
+}
+
+func (t Tlt) Execute(registers map[Reg]Register) {
+	currentFlags := registers[flags].Read()
+	currentFlags |= (1 << testFlag)
+
+	if t.A.Value(registers) < t.B.Value(registers) {
+		currentFlags |= (1 << executeFlag)
+	} else {
+		currentFlags &^= (1 << executeFlag)
+	}
+
+	registers[flags].Write(currentFlags)
+}
+
+func (t Tlt) Accesses() []Reg {
+	return nil
+}
+
+func (t Tlt) String() string {
+	return fmt.Sprintf("tlt %v %v", t.A, t.B)
+}
+
+func (t Tlt) Label() string {
+	return ""
+}
+
+func (t Tlt) Condition() ConditionType {
+	return Always
+}
+
+type Tcp struct {
+	A Operand
+	B Operand
+}
+
+func (t Tcp) Validate() error {
+	return nil
+}
+
+func (t Tcp) Cost() int {
+	return 1
+}
+
+func (t Tcp) Execute(registers map[Reg]Register) {
+	currentFlags := registers[flags].Read()
+
+	switch {
+	case t.A.Value(registers) > t.B.Value(registers):
+		currentFlags |= (1 << testFlag)
+		currentFlags |= (1 << executeFlag)
+	case t.A.Value(registers) < t.B.Value(registers):
+		currentFlags |= (1 << testFlag)
+		currentFlags &^= (1 << executeFlag)
+	default:
+		currentFlags &^= (1 << testFlag)
+		currentFlags &^= (1 << executeFlag)
+	}
+
+	registers[flags].Write(currentFlags)
+}
+
+func (t Tcp) Accesses() []Reg {
+	return nil
+}
+
+func (t Tcp) String() string {
+	return fmt.Sprintf("tcp %v %v", t.A, t.B)
+}
+
+func (t Tcp) Label() string {
+	return ""
+}
+
+func (t Tcp) Condition() ConditionType {
 	return Always
 }
