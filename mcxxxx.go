@@ -1,6 +1,7 @@
 package fengzhouemu
 
 import (
+	"math"
 	"regexp"
 )
 
@@ -37,19 +38,20 @@ func (i Imm) Value(registers map[Reg]Register) int16 {
 // MC is a generic microcontroller.
 type MC struct {
 	program  []Inst
-	executed map[int]bool
+	executed map[int16]bool
+	labels   map[string]int16
 
-	power     int
-	ip        int
-	registers map[Reg]Register
+	power int
+	reg   map[Reg]Register
 }
 
 // NewMC creates a new generic microcontroller with the given registers and no limits on program size.
-func NewMC(registers map[Reg]Register, program []Inst) (*MC, error) {
+func NewMC(reg map[Reg]Register, program []Inst) (*MC, error) {
 	mc := &MC{
-		program:   program,
-		executed:  make(map[int]bool, len(program)),
-		registers: registers,
+		program:  program,
+		executed: make(map[int16]bool, len(program)),
+		labels:   make(map[string]int16),
+		reg:      reg,
 	}
 
 	if err := mc.Validate(program); err != nil {
@@ -59,43 +61,68 @@ func NewMC(registers map[Reg]Register, program []Inst) (*MC, error) {
 	return mc, nil
 }
 
+func (mc *MC) registers() map[Reg]Register {
+	return mc.reg
+}
+
+func (mc *MC) jump(label string) {
+	// guaranteed due to program validation
+	ptr := mc.labels[label]
+	mc.reg[ip].Write(ptr)
+}
+
 func (mc *MC) fetch() Inst {
 	if len(mc.program) == 0 {
 		// variable size program is empty
 		return nil
 	}
 
-	inst := mc.program[mc.ip]
-	if inst != nil {
-		mc.ip++
+	currentIp := mc.reg[ip].Read()
+	inst := mc.program[currentIp]
 
-		if mc.ip >= len(mc.program) {
-			mc.ip = 0
+	if inst != nil {
+		currentIp++
+
+		if int(currentIp) >= len(mc.program) {
+			currentIp = 0
 		}
 
+		mc.reg[ip].Write(currentIp)
 		return inst
 	}
 
-	if mc.ip == 0 {
+	if currentIp == 0 {
 		// fixed size program is empty
 		return nil
 	}
 
 	// reached end of fixed size program, or instruction gap, or nil instruction
-	mc.ip = 0
-	return mc.program[mc.ip]
+	mc.reg[ip].Write(0)
+	return mc.program[0]
 }
 
 // Validate checks that the given program is valid for this microcontroller.
 func (mc *MC) Validate(program []Inst) error {
-	for _, inst := range program {
+	if len(program) >= math.MaxInt16 {
+		return ProgramTooLargeErr{len(program)}
+	}
+
+	for i, inst := range program {
 		if inst == nil {
 			continue
 		}
 
 		label := inst.Label()
-		if !validLabel.MatchString(label) {
-			return InvalidLabelNameErr{label}
+		if label != "" {
+			if !validLabel.MatchString(label) {
+				return InvalidLabelNameErr{label}
+			}
+
+			if _, ok := mc.labels[label]; ok {
+				return LabelAlreadyDefinedErr{label}
+			}
+
+			mc.labels[label] = int16(i)
 		}
 
 		accesses := inst.Accesses()
@@ -105,8 +132,21 @@ func (mc *MC) Validate(program []Inst) error {
 				return InvalidRegisterErr{reg.String()}
 			}
 
-			if _, ok := mc.registers[reg]; !ok {
+			if _, ok := mc.reg[reg]; !ok {
 				return InvalidRegisterErr{reg.String()}
+			}
+		}
+
+		if err := inst.Validate(); err != nil {
+			return err
+		}
+	}
+
+	// second pass, validate jmps
+	for _, inst := range program {
+		if jmp, ok := inst.(Jmp); ok {
+			if _, ok := mc.labels[jmp.A]; !ok {
+				return LabelNotDefinedErr{jmp.A}
 			}
 		}
 	}
@@ -129,16 +169,18 @@ func (mc *MC) Step() {
 			return
 		}
 
-		flags := mc.registers[flags].Read()
+		flags := mc.reg[flags].Read()
 
 		switch inst.Condition() {
 		case Once:
+			ip := mc.reg[ip].Read()
+
 			// already executed
-			if mc.executed[mc.ip] {
+			if mc.executed[ip] {
 				continue
 			}
 
-			mc.executed[mc.ip] = true
+			mc.executed[ip] = true
 		case Enable:
 			if flags&testFlag == 0 || flags&enableFlag == 0 {
 				continue
@@ -152,6 +194,6 @@ func (mc *MC) Step() {
 		break
 	}
 
-	inst.Execute(mc.registers)
+	inst.Execute(mc)
 	mc.power += inst.Cost()
 }

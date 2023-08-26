@@ -1,6 +1,8 @@
 package fengzhouemu
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Nop struct{}
 
@@ -12,7 +14,7 @@ func (n Nop) Cost() int {
 	return 1
 }
 
-func (n Nop) Execute(registers map[Reg]Register) {}
+func (n Nop) Execute(mc *MC) {}
 
 func (n Nop) Accesses() []Reg {
 	return nil
@@ -47,9 +49,9 @@ func (m Mov) Cost() int {
 	return 1
 }
 
-func (m Mov) Execute(registers map[Reg]Register) {
-	v := m.A.Value(registers)
-	registers[m.B].Write(v)
+func (m Mov) Execute(mc *MC) {
+	v := m.A.Value(mc.reg)
+	mc.reg[m.B].Write(v)
 }
 
 func (m Mov) Accesses() []Reg {
@@ -69,5 +71,37 @@ func (m Mov) Label() string {
 }
 
 func (m Mov) Condition() ConditionType {
+	return Always
+}
+
+type Jmp struct {
+	A string
+}
+
+func (j Jmp) Validate() error {
+	return nil
+}
+
+func (j Jmp) Cost() int {
+	return 1
+}
+
+func (j Jmp) Execute(mc *MC) {
+	mc.jump(j.A)
+}
+
+func (j Jmp) Accesses() []Reg {
+	return nil
+}
+
+func (j Jmp) String() string {
+	return fmt.Sprintf("jmp %v", j.A)
+}
+
+func (j Jmp) Label() string {
+	return ""
+}
+
+func (j Jmp) Condition() ConditionType {
 	return Always
 }

@@ -49,7 +49,7 @@ type Operand interface {
 // Inst represents a single instruction.
 type Inst interface {
 	Validate() error
-	Execute(map[Reg]Register)
+	Execute(*MC)
 	Cost() int
 	Accesses() []Reg
 	String() string

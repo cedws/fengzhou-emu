@@ -8,10 +8,10 @@ import (
 
 func TestImmediate(t *testing.T) {
 	i := Mov{Imm(-1000), Reg(Acc)}
-	assert.ErrorIs(t, NumberTooSmallErr{-1000}, i.Validate())
+	assert.ErrorIs(t, i.Validate(), NumberTooSmallErr{-1000})
 
 	i = Mov{Imm(1000), Reg(Acc)}
-	assert.ErrorIs(t, NumberTooLargeErr{1000}, i.Validate())
+	assert.ErrorIs(t, i.Validate(), NumberTooLargeErr{1000})
 }
 
 func TestNop(t *testing.T) {
@@ -89,14 +89,16 @@ func TestTeqExecute(t *testing.T) {
 	reg[Dat].Write(1)
 
 	i := Teq{Reg(Acc), Reg(Dat)}
+	m, err := NewMC(reg, []Inst{i})
+	assert.Nil(t, err)
 
-	i.Execute(reg)
+	i.Execute(m)
 	assert.Equal(t, int16(testFlag|enableFlag), reg[flags].Read())
 
 	reg[Acc].Write(2)
 	reg[Dat].Write(1)
 
-	i.Execute(reg)
+	i.Execute(m)
 	assert.Equal(t, int16(testFlag), reg[flags].Read())
 }
 
@@ -113,14 +115,16 @@ func TestTgtExecute(t *testing.T) {
 	reg[Dat].Write(1)
 
 	i := Tgt{Reg(Acc), Reg(Dat)}
+	m, err := NewMC(reg, []Inst{i})
+	assert.Nil(t, err)
 
-	i.Execute(reg)
+	i.Execute(m)
 	assert.Equal(t, int16(testFlag|enableFlag), reg[flags].Read())
 
 	reg[Acc].Write(1)
 	reg[Dat].Write(1)
 
-	i.Execute(reg)
+	i.Execute(m)
 	assert.Equal(t, int16(testFlag), reg[flags].Read())
 }
 
@@ -137,14 +141,16 @@ func TestTltExecute(t *testing.T) {
 	reg[Dat].Write(2)
 
 	i := Tlt{Reg(Acc), Reg(Dat)}
+	m, err := NewMC(reg, []Inst{i})
+	assert.Nil(t, err)
 
-	i.Execute(reg)
+	i.Execute(m)
 	assert.Equal(t, int16(testFlag|enableFlag), reg[flags].Read())
 
 	reg[Acc].Write(1)
 	reg[Dat].Write(1)
 
-	i.Execute(reg)
+	i.Execute(m)
 	assert.Equal(t, int16(testFlag), reg[flags].Read())
 }
 
@@ -161,20 +167,22 @@ func TestTcpExecute(t *testing.T) {
 	reg[Dat].Write(1)
 
 	i := Tcp{Reg(Acc), Reg(Dat)}
+	m, err := NewMC(reg, []Inst{i})
+	assert.Nil(t, err)
 
-	i.Execute(reg)
+	i.Execute(m)
 	assert.Equal(t, int16(testFlag|enableFlag), reg[flags].Read())
 
 	reg[Acc].Write(1)
 	reg[Dat].Write(2)
 
-	i.Execute(reg)
+	i.Execute(m)
 	assert.Equal(t, int16(testFlag), reg[flags].Read())
 
 	reg[Acc].Write(1)
 	reg[Dat].Write(1)
 
-	i.Execute(reg)
+	i.Execute(m)
 	assert.Equal(t, int16(0), reg[flags].Read())
 }
 
@@ -195,5 +203,5 @@ func TestInstInvalidLabel(t *testing.T) {
 	assert.Equal(t, "hello;", n.Label())
 
 	_, err := NewMC4000(MC4000Program{n})
-	assert.ErrorIs(t, InvalidLabelNameErr{"hello;"}, err)
+	assert.ErrorIs(t, err, InvalidLabelNameErr{"hello;"})
 }

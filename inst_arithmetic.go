@@ -18,11 +18,11 @@ func (a Add) Cost() int {
 	return 1
 }
 
-func (a Add) Execute(registers map[Reg]Register) {
-	v := a.A.Value(registers)
+func (a Add) Execute(mc *MC) {
+	v := a.A.Value(mc.reg)
 
-	n := registers[Acc].Read() + v
-	registers[Acc].Write(n)
+	n := mc.reg[Acc].Read() + v
+	mc.reg[Acc].Write(n)
 }
 
 func (a Add) Accesses() []Reg {
@@ -61,11 +61,11 @@ func (s Sub) Cost() int {
 	return 1
 }
 
-func (s Sub) Execute(registers map[Reg]Register) {
-	v := s.A.Value(registers)
+func (s Sub) Execute(mc *MC) {
+	v := s.A.Value(mc.reg)
 
-	n := registers[Acc].Read() - v
-	registers[Acc].Write(n)
+	n := mc.reg[Acc].Read() - v
+	mc.reg[Acc].Write(n)
 }
 
 func (s Sub) Accesses() []Reg {
@@ -104,11 +104,11 @@ func (m Mul) Cost() int {
 	return 1
 }
 
-func (m Mul) Execute(registers map[Reg]Register) {
-	v := m.A.Value(registers)
+func (m Mul) Execute(mc *MC) {
+	v := m.A.Value(mc.reg)
 
-	n := registers[Acc].Read() * v
-	registers[Acc].Write(n)
+	n := mc.reg[Acc].Read() * v
+	mc.reg[Acc].Write(n)
 }
 
 func (m Mul) Accesses() []Reg {
@@ -141,8 +141,8 @@ func (n Not) Cost() int {
 	return 1
 }
 
-func (n Not) Execute(registers map[Reg]Register) {
-	v := registers[Acc].Read()
+func (n Not) Execute(mc *MC) {
+	v := mc.reg[Acc].Read()
 
 	switch v {
 	case 0:
@@ -151,7 +151,7 @@ func (n Not) Execute(registers map[Reg]Register) {
 		v = 0
 	}
 
-	registers[Acc].Write(v)
+	mc.reg[Acc].Write(v)
 }
 
 func (n Not) Accesses() []Reg {

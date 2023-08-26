@@ -18,7 +18,8 @@ const (
 	X1
 	X2
 	X3
-	// flags register, not accessible
+	// private registers, not accessible
+	ip
 	flags
 )
 
@@ -42,7 +43,7 @@ func (r Reg) String() string {
 		return "x2"
 	case X3:
 		return "x3"
-	case flags:
+	case ip, flags:
 		fallthrough
 	default:
 		return "(unknown register)"

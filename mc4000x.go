@@ -9,6 +9,7 @@ func defaultMC4000XRegisters() map[Reg]Register {
 		X2:    &XbusPinRegister{},
 		X3:    &XbusPinRegister{},
 		flags: &InternalRegister{},
+		ip:    &InternalRegister{},
 	}
 }
 

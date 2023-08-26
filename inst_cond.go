@@ -26,17 +26,17 @@ func (t Teq) Cost() int {
 	return 1
 }
 
-func (t Teq) Execute(registers map[Reg]Register) {
-	currentFlags := registers[flags].Read()
+func (t Teq) Execute(mc *MC) {
+	currentFlags := mc.reg[flags].Read()
 	currentFlags |= testFlag
 
-	if t.A.Value(registers) == t.B.Value(registers) {
+	if t.A.Value(mc.reg) == t.B.Value(mc.reg) {
 		currentFlags |= enableFlag
 	} else {
 		currentFlags &^= enableFlag
 	}
 
-	registers[flags].Write(currentFlags)
+	mc.reg[flags].Write(currentFlags)
 }
 
 func (t Teq) Accesses() (registers []Reg) {
@@ -85,17 +85,17 @@ func (t Tgt) Cost() int {
 	return 1
 }
 
-func (t Tgt) Execute(registers map[Reg]Register) {
-	currentFlags := registers[flags].Read()
+func (t Tgt) Execute(mc *MC) {
+	currentFlags := mc.reg[flags].Read()
 	currentFlags |= testFlag
 
-	if t.A.Value(registers) > t.B.Value(registers) {
+	if t.A.Value(mc.reg) > t.B.Value(mc.reg) {
 		currentFlags |= enableFlag
 	} else {
 		currentFlags &^= enableFlag
 	}
 
-	registers[flags].Write(currentFlags)
+	mc.reg[flags].Write(currentFlags)
 }
 
 func (t Tgt) Accesses() (registers []Reg) {
@@ -144,17 +144,17 @@ func (t Tlt) Cost() int {
 	return 1
 }
 
-func (t Tlt) Execute(registers map[Reg]Register) {
-	currentFlags := registers[flags].Read()
+func (t Tlt) Execute(mc *MC) {
+	currentFlags := mc.reg[flags].Read()
 	currentFlags |= testFlag
 
-	if t.A.Value(registers) < t.B.Value(registers) {
+	if t.A.Value(mc.reg) < t.B.Value(mc.reg) {
 		currentFlags |= enableFlag
 	} else {
 		currentFlags &^= enableFlag
 	}
 
-	registers[flags].Write(currentFlags)
+	mc.reg[flags].Write(currentFlags)
 }
 
 func (t Tlt) Accesses() (registers []Reg) {
@@ -203,21 +203,21 @@ func (t Tcp) Cost() int {
 	return 1
 }
 
-func (t Tcp) Execute(registers map[Reg]Register) {
-	currentFlags := registers[flags].Read()
+func (t Tcp) Execute(mc *MC) {
+	currentFlags := mc.reg[flags].Read()
 
 	switch {
-	case t.A.Value(registers) > t.B.Value(registers):
+	case t.A.Value(mc.reg) > t.B.Value(mc.reg):
 		currentFlags |= testFlag
 		currentFlags |= enableFlag
-	case t.A.Value(registers) < t.B.Value(registers):
+	case t.A.Value(mc.reg) < t.B.Value(mc.reg):
 		currentFlags |= testFlag
 		currentFlags &^= enableFlag
 	default:
 		currentFlags &^= testFlag
 	}
 
-	registers[flags].Write(currentFlags)
+	mc.reg[flags].Write(currentFlags)
 }
 
 func (t Tcp) Accesses() (registers []Reg) {

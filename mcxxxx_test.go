@@ -17,33 +17,36 @@ func newRegisters() map[Reg]Register {
 		X1:    &XbusPinRegister{},
 		X2:    &XbusPinRegister{},
 		X3:    &XbusPinRegister{},
+		ip:    &InternalRegister{},
 		flags: &InternalRegister{},
 	}
 }
 
 func TestMCEmptyProgram(t *testing.T) {
-	m, _ := NewMC(newRegisters(), []Inst{})
+	m, err := NewMC(newRegisters(), []Inst{})
+	assert.Nil(t, err)
 
 	m.Step()
-	assert.Equal(t, 0, m.ip)
+	assert.Equal(t, int16(0), m.reg[ip].Read())
 	m.Step()
-	assert.Equal(t, 0, m.ip)
+	assert.Equal(t, int16(0), m.reg[ip].Read())
 }
 
 func TestMCNonEmptyProgram(t *testing.T) {
-	m, _ := NewMC(newRegisters(), []Inst{Nop{}, Nop{}})
+	m, err := NewMC(newRegisters(), []Inst{Nop{}, Nop{}})
+	assert.Nil(t, err)
 
-	assert.Equal(t, 0, m.ip)
+	assert.Equal(t, int16(0), m.reg[ip].Read())
 	m.Step()
-	assert.Equal(t, 1, m.ip)
+	assert.Equal(t, int16(1), m.reg[ip].Read())
 	m.Step()
-	assert.Equal(t, 0, m.ip)
+	assert.Equal(t, int16(0), m.reg[ip].Read())
 	m.Step()
-	assert.Equal(t, 1, m.ip)
+	assert.Equal(t, int16(1), m.reg[ip].Read())
 }
 
 func TestMCArithmetic(t *testing.T) {
-	m, _ := NewMC(newRegisters(), []Inst{
+	m, err := NewMC(newRegisters(), []Inst{
 		Mov{Imm(1), Reg(Acc)},
 		Add{Reg(Acc)},
 		Sub{Imm(2)},
@@ -51,29 +54,30 @@ func TestMCArithmetic(t *testing.T) {
 		Add{Imm(1)},
 		Mul{Imm(42)},
 		Not{},
-		Sub{Imm(1000)},
+		Sub{Imm(999)},
 	})
+	assert.Nil(t, err)
 
 	m.Step()
-	assert.Equal(t, int16(1), m.registers[Acc].Read())
+	assert.Equal(t, int16(1), m.reg[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(2), m.registers[Acc].Read())
+	assert.Equal(t, int16(2), m.reg[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(0), m.registers[Acc].Read())
+	assert.Equal(t, int16(0), m.reg[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(100), m.registers[Acc].Read())
+	assert.Equal(t, int16(100), m.reg[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(101), m.registers[Acc].Read())
+	assert.Equal(t, int16(101), m.reg[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(999), m.registers[Acc].Read())
+	assert.Equal(t, int16(999), m.reg[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(0), m.registers[Acc].Read())
+	assert.Equal(t, int16(0), m.reg[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(-999), m.registers[Acc].Read())
+	assert.Equal(t, int16(-999), m.reg[Acc].Read())
 }
 
 func TestMCPower(t *testing.T) {
-	m, _ := NewMC(newRegisters(), []Inst{
+	m, err := NewMC(newRegisters(), []Inst{
 		Mov{Imm(1), Reg(Acc)},
 		Add{Reg(Acc)},
 		Add{Reg(Acc)},
@@ -82,6 +86,7 @@ func TestMCPower(t *testing.T) {
 		Add{Imm(1)},
 		Mul{Imm(42)},
 	})
+	assert.Nil(t, err)
 
 	for i := 0; i < 42; i++ {
 		m.Step()
@@ -91,72 +96,77 @@ func TestMCPower(t *testing.T) {
 }
 
 func TestMCNullRegister(t *testing.T) {
-	m, _ := NewMC(newRegisters(), []Inst{
+	m, err := NewMC(newRegisters(), []Inst{
 		Mov{Imm(100), Reg(Null)},
 	})
+	assert.Nil(t, err)
 
 	m.Step()
-	assert.Equal(t, int16(0), m.registers[Null].Read())
+	assert.Equal(t, int16(0), m.reg[Null].Read())
 }
 
 func TestMCInternalRegister(t *testing.T) {
-	m, _ := NewMC(newRegisters(), []Inst{
+	m, err := NewMC(newRegisters(), []Inst{
 		Mov{Imm(100), Reg(Acc)},
 	})
+	assert.Nil(t, err)
 
 	m.Step()
-	assert.Equal(t, int16(100), m.registers[Acc].Read())
+	assert.Equal(t, int16(100), m.reg[Acc].Read())
 }
 
 func TestMCExecuteOnce(t *testing.T) {
-	m, _ := NewMC(newRegisters(), []Inst{
+	m, err := NewMC(newRegisters(), []Inst{
 		Condition(Once, Mov{Imm(0), Reg(Acc)}),
 		Condition(Once, Mov{Imm(1), Reg(Acc)}),
 		Mov{Imm(2), Reg(Acc)},
 	})
+	assert.Nil(t, err)
 
 	m.Step()
-	assert.Equal(t, int16(0), m.registers[Acc].Read())
+	assert.Equal(t, int16(0), m.reg[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(1), m.registers[Acc].Read())
+	assert.Equal(t, int16(1), m.reg[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(2), m.registers[Acc].Read())
+	assert.Equal(t, int16(2), m.reg[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(2), m.registers[Acc].Read())
+	assert.Equal(t, int16(2), m.reg[Acc].Read())
 	m.Step()
-	assert.Equal(t, int16(2), m.registers[Acc].Read())
+	assert.Equal(t, int16(2), m.reg[Acc].Read())
 }
 
 func TestMCExecuteEnable(t *testing.T) {
-	m, _ := NewMC(newRegisters(), []Inst{
+	m, err := NewMC(newRegisters(), []Inst{
 		Condition(Enable, Mov{Imm(1), Reg(Acc)}),
 		Teq{Imm(1), Imm(1)},
 		Condition(Enable, Mov{Imm(1), Reg(Acc)}),
 	})
+	assert.Nil(t, err)
 
 	m.Step()
-	assert.Equal(t, int16(0), m.registers[Acc].Read())
+	assert.Equal(t, int16(0), m.reg[Acc].Read())
 	m.Step()
 	m.Step()
-	assert.Equal(t, int16(1), m.registers[Acc].Read())
+	assert.Equal(t, int16(1), m.reg[Acc].Read())
 }
 
 func TestMCExecuteDisable(t *testing.T) {
-	m, _ := NewMC(newRegisters(), []Inst{
+	m, err := NewMC(newRegisters(), []Inst{
 		Condition(Disable, Mov{Imm(1), Reg(Acc)}),
 		Teq{Imm(1), Imm(2)},
 		Condition(Disable, Mov{Imm(1), Reg(Acc)}),
 	})
+	assert.Nil(t, err)
 
 	m.Step()
-	assert.Equal(t, int16(0), m.registers[Acc].Read())
+	assert.Equal(t, int16(0), m.reg[Acc].Read())
 	m.Step()
 	m.Step()
-	assert.Equal(t, int16(1), m.registers[Acc].Read())
+	assert.Equal(t, int16(1), m.reg[Acc].Read())
 }
 
 func TestMCTcpExecuteCondition(t *testing.T) {
-	m, _ := NewMC(newRegisters(), []Inst{
+	m, err := NewMC(newRegisters(), []Inst{
 		Tcp{Imm(2), Imm(1)},
 		Condition(Enable, Mov{Imm(1), Reg(Dat)}),
 		Condition(Disable, Mov{Imm(-1), Reg(Dat)}),
@@ -165,12 +175,44 @@ func TestMCTcpExecuteCondition(t *testing.T) {
 		Condition(Enable, Mov{Imm(1), Reg(Dat)}),
 		Condition(Disable, Mov{Imm(-1), Reg(Dat)}),
 	})
+	assert.Nil(t, err)
 
 	m.Step()
 	m.Step()
-	assert.Equal(t, int16(1), m.registers[Dat].Read())
+	assert.Equal(t, int16(1), m.reg[Dat].Read())
 	m.Step()
-	assert.Equal(t, int16(0), m.registers[Dat].Read())
+	assert.Equal(t, int16(0), m.reg[Dat].Read())
 	m.Step()
-	assert.Equal(t, int16(0), m.registers[Dat].Read())
+	assert.Equal(t, int16(0), m.reg[Dat].Read())
+}
+
+func TestMCUndefinedJmp(t *testing.T) {
+	_, err := NewMC(newRegisters(), []Inst{
+		Jmp{"123"},
+	})
+	assert.ErrorIs(t, err, LabelNotDefinedErr{"123"})
+}
+
+func TestMCDefinedJmp(t *testing.T) {
+	_, err := NewMC(newRegisters(), []Inst{
+		Jmp{"123"},
+		Label("123", Nop{}),
+	})
+	assert.Nil(t, err)
+}
+
+func TestMCJmp(t *testing.T) {
+	m, err := NewMC(newRegisters(), []Inst{
+		Jmp{"123"},
+		Nop{},
+		Nop{},
+		Nop{},
+		Label("123", Mov{Imm(100), Reg(Dat)}),
+	})
+	assert.Nil(t, err)
+
+	m.Step()
+	m.Step()
+	assert.Equal(t, int16(100), m.reg[Dat].Read())
+	assert.Equal(t, int(2), m.Power())
 }
