@@ -19,7 +19,7 @@ func TestMov(t *testing.T) {
 	assert.Equal(t, []Reg{Acc}, i.Accesses())
 	assert.Equal(t, "mov 1 acc", i.String())
 
-	i = Mov{Reg(Acc), Reg(Acc)}
-	assert.Equal(t, []Reg{Acc}, i.Accesses())
-	assert.Equal(t, "mov acc acc", i.String())
+	i = Mov{Reg(Acc), Reg(Dat)}
+	assert.Equal(t, []Reg{Acc, Dat}, i.Accesses())
+	assert.Equal(t, "mov acc dat", i.String())
 }

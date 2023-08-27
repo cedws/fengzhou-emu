@@ -41,7 +41,7 @@ func Condition(c ConditionType, i Inst) Inst {
 	}
 }
 
-// Operand represents a generic operand that can be either a Register or immediate value.
+// Operand represents a generic operand that can be either a Reg or immediate value.
 type Operand interface {
 	Value(map[Reg]Register) int16
 }

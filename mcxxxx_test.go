@@ -31,10 +31,10 @@ func TestMCEmptyProgram(t *testing.T) {
 	m, err := NewMC(newRegisters(), []Inst{})
 	assert.Nil(t, err)
 
-	m.Step()
-	assert.Equal(t, int16(0), m.reg[ip].Read())
-	m.Step()
-	assert.Equal(t, int16(0), m.reg[ip].Read())
+	for i := 0; i < 42; i++ {
+		m.Step()
+		assert.Equal(t, int16(0), m.reg[ip].Read())
+	}
 }
 
 func TestMCNonEmptyProgram(t *testing.T) {
@@ -83,13 +83,7 @@ func TestMCArithmetic(t *testing.T) {
 
 func TestMCPower(t *testing.T) {
 	m, err := NewMC(newRegisters(), []Inst{
-		Mov{Imm(1), Reg(Acc)},
-		Add{Reg(Acc)},
-		Add{Reg(Acc)},
-		Sub{Imm(2)},
-		Sub{Imm(2)},
-		Add{Imm(1)},
-		Mul{Imm(42)},
+		Nop{},
 	})
 	assert.Nil(t, err)
 
