@@ -61,10 +61,6 @@ func NewMC(reg map[Reg]Register, program []Inst) (*MC, error) {
 	return mc, nil
 }
 
-func (mc *MC) registers() map[Reg]Register {
-	return mc.reg
-}
-
 func (mc *MC) jump(label string) {
 	// guaranteed due to program validation
 	ptr := mc.labels[label]
