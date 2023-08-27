@@ -67,10 +67,10 @@ func (mc *MC) jump(label string) {
 	mc.reg[ip].Write(ptr)
 }
 
-func (mc *MC) fetch() Inst {
+func (mc *MC) fetch() (Inst, int16) {
 	if len(mc.program) == 0 {
 		// variable size program is empty
-		return nil
+		return nil, 0
 	}
 
 	currentIp := mc.reg[ip].Read()
@@ -84,17 +84,17 @@ func (mc *MC) fetch() Inst {
 		}
 
 		mc.reg[ip].Write(currentIp)
-		return inst
+		return inst, currentIp
 	}
 
 	if currentIp == 0 {
 		// fixed size program is empty
-		return nil
+		return nil, currentIp
 	}
 
 	// reached end of fixed size program, or instruction gap, or nil instruction
 	mc.reg[ip].Write(0)
-	return mc.program[0]
+	return mc.program[0], 0
 }
 
 // Validate checks that the given program is valid for this microcontroller.
@@ -158,20 +158,19 @@ func (mc *MC) Power() int {
 
 // Step executes the next instruction in the program.
 func (mc *MC) Step() {
-	var inst Inst
+	var (
+		inst Inst
+		ip   int16
+	)
 
 	for {
-		inst = mc.fetch()
+		inst, ip = mc.fetch()
 		if inst == nil {
 			return
 		}
 
-		flags := mc.reg[flags].Read()
-
 		switch inst.Condition() {
 		case Once:
-			ip := mc.reg[ip].Read()
-
 			// already executed
 			if mc.executed[ip] {
 				continue
@@ -179,10 +178,14 @@ func (mc *MC) Step() {
 
 			mc.executed[ip] = true
 		case Enable:
+			flags := mc.reg[flags].Read()
+
 			if flags&testFlag == 0 || flags&enableFlag == 0 {
 				continue
 			}
 		case Disable:
+			flags := mc.reg[flags].Read()
+
 			if flags&testFlag == 0 || flags&enableFlag != 0 {
 				continue
 			}
