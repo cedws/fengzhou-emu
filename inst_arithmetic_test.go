@@ -92,7 +92,8 @@ func TestDgtExecute(t *testing.T) {
 		reg[Acc].Write(v.Acc)
 
 		i := Dgt{v.A}
-		m, err := NewMC(reg, []Inst{i})
+		m := NewMC(reg)
+		err := m.Load([]Inst{i})
 		assert.Nil(t, err)
 
 		i.Execute(m)
@@ -143,7 +144,8 @@ func TestDstExecute(t *testing.T) {
 		reg[Acc].Write(v.Acc)
 
 		i := Dst{v.A, v.B}
-		m, err := NewMC(reg, []Inst{i})
+		m := NewMC(reg)
+		err := m.Load([]Inst{i})
 		assert.Nil(t, err)
 
 		i.Execute(m)

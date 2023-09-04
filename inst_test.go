@@ -22,6 +22,7 @@ func TestInstInvalidLabel(t *testing.T) {
 	n := Label("hello;", Nop{})
 	assert.Equal(t, "hello;", n.Label())
 
-	_, err := NewMC(newRegisters(), []Inst{n})
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{n})
 	assert.ErrorIs(t, err, InvalidLabelNameErr{"hello;"})
 }

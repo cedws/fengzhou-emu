@@ -13,7 +13,7 @@ type (
 		Imm Imm
 	}
 	InvalidRegisterErr struct {
-		Reg string
+		Reg Reg
 	}
 	InvalidLabelNameErr struct {
 		Label string
@@ -23,6 +23,9 @@ type (
 	}
 	LabelAlreadyDefinedErr struct {
 		Label string
+	}
+	PinNotConnectedErr struct {
+		Reg Reg
 	}
 )
 
@@ -52,4 +55,8 @@ func (e LabelNotDefinedErr) Error() string {
 
 func (e LabelAlreadyDefinedErr) Error() string {
 	return fmt.Sprintf("label already defined (%v)", e.Label)
+}
+
+func (e PinNotConnectedErr) Error() string {
+	return fmt.Sprintf("pin not connected (%v)", e.Reg)
 }

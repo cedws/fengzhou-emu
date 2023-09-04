@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func newRegisters() map[Reg]Register {
@@ -28,8 +29,9 @@ func TestImmediate(t *testing.T) {
 }
 
 func TestMCEmptyProgram(t *testing.T) {
-	m, err := NewMC(newRegisters(), []Inst{})
-	assert.Nil(t, err)
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{})
+	require.Nil(t, err)
 
 	for i := 0; i < 42; i++ {
 		m.Step()
@@ -38,8 +40,9 @@ func TestMCEmptyProgram(t *testing.T) {
 }
 
 func TestMCNonEmptyProgram(t *testing.T) {
-	m, err := NewMC(newRegisters(), []Inst{Nop{}, Nop{}})
-	assert.Nil(t, err)
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{Nop{}, Nop{}})
+	require.Nil(t, err)
 
 	assert.Equal(t, int16(0), m.reg[ip].Read())
 	m.Step()
@@ -51,7 +54,8 @@ func TestMCNonEmptyProgram(t *testing.T) {
 }
 
 func TestMCArithmetic(t *testing.T) {
-	m, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Mov{Imm(1), Reg(Acc)},
 		Add{Reg(Acc)},
 		Sub{Imm(2)},
@@ -61,7 +65,7 @@ func TestMCArithmetic(t *testing.T) {
 		Not{},
 		Sub{Imm(999)},
 	})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	m.Step()
 	assert.Equal(t, int16(1), m.reg[Acc].Read())
@@ -82,10 +86,11 @@ func TestMCArithmetic(t *testing.T) {
 }
 
 func TestMCPower(t *testing.T) {
-	m, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Nop{},
 	})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	for i := 0; i < 42; i++ {
 		m.Step()
@@ -95,32 +100,35 @@ func TestMCPower(t *testing.T) {
 }
 
 func TestMCNullRegister(t *testing.T) {
-	m, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Mov{Imm(100), Reg(Null)},
 	})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	m.Step()
 	assert.Equal(t, int16(0), m.reg[Null].Read())
 }
 
 func TestMCInternalRegister(t *testing.T) {
-	m, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Mov{Imm(100), Reg(Acc)},
 	})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	m.Step()
 	assert.Equal(t, int16(100), m.reg[Acc].Read())
 }
 
 func TestMCExecuteOnce(t *testing.T) {
-	m, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Condition(Once, Mov{Imm(0), Reg(Acc)}),
 		Condition(Once, Mov{Imm(1), Reg(Acc)}),
 		Mov{Imm(2), Reg(Acc)},
 	})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	m.Step()
 	assert.Equal(t, int16(0), m.reg[Acc].Read())
@@ -135,12 +143,13 @@ func TestMCExecuteOnce(t *testing.T) {
 }
 
 func TestMCExecuteEnable(t *testing.T) {
-	m, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Condition(Enable, Mov{Imm(1), Reg(Acc)}),
 		Teq{Imm(1), Imm(1)},
 		Condition(Enable, Mov{Imm(1), Reg(Acc)}),
 	})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	m.Step()
 	assert.Equal(t, int16(0), m.reg[Acc].Read())
@@ -150,12 +159,13 @@ func TestMCExecuteEnable(t *testing.T) {
 }
 
 func TestMCExecuteDisable(t *testing.T) {
-	m, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Condition(Disable, Mov{Imm(1), Reg(Acc)}),
 		Teq{Imm(1), Imm(2)},
 		Condition(Disable, Mov{Imm(1), Reg(Acc)}),
 	})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	m.Step()
 	assert.Equal(t, int16(0), m.reg[Acc].Read())
@@ -165,7 +175,8 @@ func TestMCExecuteDisable(t *testing.T) {
 }
 
 func TestMCTcpExecuteCondition(t *testing.T) {
-	m, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Tcp{Imm(2), Imm(1)},
 		Condition(Enable, Mov{Imm(1), Reg(Dat)}),
 		Condition(Disable, Mov{Imm(-1), Reg(Dat)}),
@@ -174,7 +185,7 @@ func TestMCTcpExecuteCondition(t *testing.T) {
 		Condition(Enable, Mov{Imm(1), Reg(Dat)}),
 		Condition(Disable, Mov{Imm(-1), Reg(Dat)}),
 	})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	m.Step()
 	m.Step()
@@ -186,7 +197,8 @@ func TestMCTcpExecuteCondition(t *testing.T) {
 }
 
 func TestMCLabelAlreadyDefined(t *testing.T) {
-	_, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Label("123", Mov{Imm(100), Reg(Dat)}),
 		Label("123", Mov{Imm(100), Reg(Dat)}),
 	})
@@ -194,14 +206,16 @@ func TestMCLabelAlreadyDefined(t *testing.T) {
 }
 
 func TestMCUndefinedJmp(t *testing.T) {
-	_, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Jmp{"123"},
 	})
 	assert.ErrorIs(t, err, LabelNotDefinedErr{"123"})
 }
 
 func TestMCDefinedJmp(t *testing.T) {
-	_, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Jmp{"123"},
 		Label("123", Nop{}),
 	})
@@ -209,14 +223,15 @@ func TestMCDefinedJmp(t *testing.T) {
 }
 
 func TestMCJmp(t *testing.T) {
-	m, err := NewMC(newRegisters(), []Inst{
+	m := NewMC(newRegisters())
+	err := m.Load([]Inst{
 		Jmp{"123"},
 		Nop{},
 		Nop{},
 		Nop{},
 		Label("123", Not{}),
 	})
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	m.Step()
 	m.Step()

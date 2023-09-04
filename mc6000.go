@@ -16,8 +16,42 @@ func defaultMC6000Registers() map[Reg]Register {
 	}
 }
 
+type MC6000 struct {
+	*MC
+}
+
 type MC6000Program [14]Inst
 
-func NewMC6000(program MC6000Program) (*MC, error) {
-	return NewMC(defaultMC6000Registers(), program[:])
+func NewMC6000() *MC6000 {
+	return &MC6000{
+		NewMC(defaultMC6000Registers()),
+	}
+}
+
+func (mc *MC6000) Load(program MC6000Program) error {
+	return mc.MC.Load(program[:])
+}
+
+func (mc *MC6000) P0() Register {
+	return mc.reg[P0]
+}
+
+func (mc *MC6000) P1() Register {
+	return mc.reg[P1]
+}
+
+func (mc *MC6000) X0() Register {
+	return mc.reg[X0]
+}
+
+func (mc *MC6000) X1() Register {
+	return mc.reg[X1]
+}
+
+func (mc *MC6000) X2() Register {
+	return mc.reg[X2]
+}
+
+func (mc *MC6000) X3() Register {
+	return mc.reg[X3]
 }

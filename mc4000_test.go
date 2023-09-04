@@ -8,14 +8,16 @@ import (
 
 func TestMC4000Validation(t *testing.T) {
 	// MC4000 does have a P0 register
-	_, err := NewMC4000(MC4000Program{
+	m := NewMC4000()
+	err := m.Load(MC4000Program{
 		Mov{Imm(1), Reg(P0)},
 	})
-	assert.Nil(t, err)
+	assert.ErrorIs(t, err, PinNotConnectedErr{Reg(P0)})
 
 	// MC4000 does NOT have an X2 register
-	_, err = NewMC4000(MC4000Program{
+	m = NewMC4000()
+	err = m.Load(MC4000Program{
 		Mov{Imm(1), Reg(X2)},
 	})
-	assert.NotNil(t, err)
+	assert.ErrorIs(t, err, InvalidRegisterErr{Reg(X2)})
 }

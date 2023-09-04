@@ -19,7 +19,8 @@ func TestTeqExecute(t *testing.T) {
 	reg[Dat].Write(1)
 
 	i := Teq{Reg(Acc), Reg(Dat)}
-	m, err := NewMC(reg, []Inst{i})
+	m := NewMC(reg)
+	err := m.Load([]Inst{i})
 	assert.Nil(t, err)
 
 	i.Execute(m)
@@ -45,7 +46,8 @@ func TestTgtExecute(t *testing.T) {
 	reg[Dat].Write(1)
 
 	i := Tgt{Reg(Acc), Reg(Dat)}
-	m, err := NewMC(reg, []Inst{i})
+	m := NewMC(reg)
+	err := m.Load([]Inst{i})
 	assert.Nil(t, err)
 
 	i.Execute(m)
@@ -71,7 +73,8 @@ func TestTltExecute(t *testing.T) {
 	reg[Dat].Write(2)
 
 	i := Tlt{Reg(Acc), Reg(Dat)}
-	m, err := NewMC(reg, []Inst{i})
+	m := NewMC(reg)
+	err := m.Load([]Inst{i})
 	assert.Nil(t, err)
 
 	i.Execute(m)
@@ -97,7 +100,8 @@ func TestTcpExecute(t *testing.T) {
 	reg[Dat].Write(1)
 
 	i := Tcp{Reg(Acc), Reg(Dat)}
-	m, err := NewMC(reg, []Inst{i})
+	m := NewMC(reg)
+	err := m.Load([]Inst{i})
 	assert.Nil(t, err)
 
 	i.Execute(m)

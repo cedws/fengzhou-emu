@@ -37,64 +37,33 @@ func (i Imm) Value(registers map[Reg]Register) int16 {
 
 // MC is a generic microcontroller.
 type MC struct {
-	program  []Inst
-	executed map[int16]bool
-	labels   map[string]int16
+	program []Inst
+	labels  map[string]int16
 
-	power int
-	reg   map[Reg]Register
+	power    int
+	executed map[int16]bool
+	reg      map[Reg]Register
 }
 
 // NewMC creates a new generic microcontroller with the given registers and no limits on program size.
-func NewMC(reg map[Reg]Register, program []Inst) (*MC, error) {
-	mc := &MC{
-		program:  program,
-		executed: make(map[int16]bool, len(program)),
-		labels:   make(map[string]int16, len(program)),
-		reg:      reg,
+func NewMC(reg map[Reg]Register) *MC {
+	return &MC{
+		reg: reg,
 	}
+}
+
+// Load loads the given program into the microcontroller.
+func (mc *MC) Load(program []Inst) error {
+	mc.executed = make(map[int16]bool, len(program))
+	mc.labels = make(map[string]int16, len(program))
 
 	if err := mc.Validate(program); err != nil {
-		return nil, err
+		return err
 	}
 
-	return mc, nil
-}
+	mc.program = program
 
-func (mc *MC) jump(label string) {
-	// guaranteed due to program validation
-	ptr := mc.labels[label]
-	mc.reg[ip].Write(ptr)
-}
-
-func (mc *MC) fetch() (Inst, int16) {
-	if len(mc.program) == 0 {
-		// variable size program is empty
-		return nil, 0
-	}
-
-	currentIp := mc.reg[ip].Read()
-	inst := mc.program[currentIp]
-
-	if inst != nil {
-		currentIp++
-
-		if int(currentIp) >= len(mc.program) {
-			currentIp = 0
-		}
-
-		mc.reg[ip].Write(currentIp)
-		return inst, currentIp
-	}
-
-	if currentIp == 0 {
-		// fixed size program is empty
-		return nil, currentIp
-	}
-
-	// reached end of fixed size program, or instruction gap, or nil instruction
-	mc.reg[ip].Write(0)
-	return mc.program[0], 0
+	return nil
 }
 
 // Validate checks that the given program is valid for this microcontroller.
@@ -126,11 +95,16 @@ func (mc *MC) Validate(program []Inst) error {
 			// programs may not access private registers
 			switch reg {
 			case ip, flags:
-				return InvalidRegisterErr{reg.String()}
+				return InvalidRegisterErr{reg}
 			}
 
-			if _, ok := mc.reg[reg]; !ok {
-				return InvalidRegisterErr{reg.String()}
+			register, ok := mc.reg[reg]
+			if !ok {
+				return InvalidRegisterErr{reg}
+			}
+
+			if !register.Wired() {
+				return PinNotConnectedErr{reg}
 			}
 		}
 
@@ -196,4 +170,40 @@ func (mc *MC) Step() {
 
 	inst.Execute(mc)
 	mc.power += inst.Cost()
+}
+
+func (mc *MC) jump(label string) {
+	// guaranteed due to program validation
+	ptr := mc.labels[label]
+	mc.reg[ip].Write(ptr)
+}
+
+func (mc *MC) fetch() (Inst, int16) {
+	if len(mc.program) == 0 {
+		// variable size program is empty
+		return nil, 0
+	}
+
+	currentIP := mc.reg[ip].Read()
+	inst := mc.program[currentIP]
+
+	if inst != nil {
+		currentIP++
+
+		if int(currentIP) >= len(mc.program) {
+			currentIP = 0
+		}
+
+		mc.reg[ip].Write(currentIP)
+		return inst, currentIP
+	}
+
+	if currentIP == 0 {
+		// fixed size program is empty
+		return nil, currentIP
+	}
+
+	// reached end of fixed size program, or instruction gap, or nil instruction
+	mc.reg[ip].Write(0)
+	return mc.program[0], 0
 }
