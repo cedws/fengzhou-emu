@@ -1,10 +1,10 @@
 package fengzhouemu
 
-type Mode int
+type PinMode int
 
 const (
-	Read Mode = iota
-	Write
+	Input PinMode = iota
+	Output
 )
 
 const (
@@ -62,7 +62,7 @@ func (r Reg) Value(registers map[Reg]Register) int16 {
 }
 
 type Register interface {
-	Mode() Mode
+	Mode() PinMode
 	Wired() bool
 	WireTo(*Link)
 	Write(int16)
@@ -72,8 +72,8 @@ type Register interface {
 
 type NullRegister struct{}
 
-func (n NullRegister) Mode() Mode {
-	return Read
+func (n NullRegister) Mode() PinMode {
+	return Output
 }
 
 func (n NullRegister) Wired() bool {
@@ -96,8 +96,8 @@ type InternalRegister struct {
 	value int16
 }
 
-func (i *InternalRegister) Mode() Mode {
-	return Read
+func (i *InternalRegister) Mode() PinMode {
+	return Output
 }
 
 func (i *InternalRegister) Wired() bool {
@@ -121,12 +121,12 @@ func (i *InternalRegister) Value() int16 {
 }
 
 type SimplePinRegister struct {
-	mode  Mode
+	mode  PinMode
 	link  *Link
 	value int16
 }
 
-func (s *SimplePinRegister) Mode() Mode {
+func (s *SimplePinRegister) Mode() PinMode {
 	return s.mode
 }
 
@@ -142,12 +142,12 @@ func (s *SimplePinRegister) WireTo(l *Link) {
 }
 
 func (s *SimplePinRegister) Write(v int16) {
-	s.mode = Write
+	s.mode = Output
 	s.value = v
 }
 
 func (s *SimplePinRegister) Read() int16 {
-	s.mode = Read
+	s.mode = Input
 	s.value = 0
 
 	if s.link != nil {
@@ -162,11 +162,11 @@ func (s *SimplePinRegister) Value() int16 {
 }
 
 type XbusPinRegister struct {
-	mode  Mode
+	mode  PinMode
 	value int16
 }
 
-func (x *XbusPinRegister) Mode() Mode {
+func (x *XbusPinRegister) Mode() PinMode {
 	return x.mode
 }
 
@@ -194,15 +194,15 @@ type Link struct {
 	pins []Register
 }
 
-func (l *Link) wireTo(reg Register) {
-	l.pins = append(l.pins, reg)
+func (l *Link) wireTo(pin Register) {
+	l.pins = append(l.pins, pin)
 }
 
 func (l *Link) read() int16 {
 	var v int16
 
 	for _, pin := range l.pins {
-		if pin.Mode() == Write {
+		if pin.Mode() == Output {
 			v = max(v, pin.Value())
 		}
 	}
